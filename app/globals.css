@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+:root {
+  --color-bg-primary: #0a0e1a;
+  --color-bg-secondary: #111827;
+  --color-bg-card: #1a1f35;
+  --color-accent: #d4a853;
+  --color-accent-hover: #e6bd6a;
+  --color-text-primary: #f0ece4;
+  --color-text-secondary: #9ca3af;
+  --color-border: #2a3050;
+}
+
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-noto-sans-sc), var(--font-inter), system-ui, sans-serif;
+}
+
+.font-playfair {
+  font-family: var(--font-playfair), var(--font-noto-serif-sc), serif;
+}
+
+.font-serif-sc {
+  font-family: var(--font-noto-serif-sc), serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+
+/* Selection highlight */
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-bg-primary);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

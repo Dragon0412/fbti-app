@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { questions } from "@/data/questions";
+import { questions as allQuestions, QuestionOption } from "@/data/questions";
 import { calculateResult, Result } from "@/utils/calculator";
+import { getPosterUrl, initMoviePosters } from "@/utils/tmdb";
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -18,10 +19,62 @@ interface AnswerEntry {
 
 export default function QuizPage() {
   const router = useRouter();
+  const [initialized, setInitialized] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<AnswerEntry[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
   const [animating, setAnimating] = useState(false);
+  const [moviePosters, setMoviePosters] = useState<Record<string, string | null>>({});
+
+  // Load movie posters on mount
+  useEffect(() => {
+    initMoviePosters().then(posters => {
+      setMoviePosters(posters);
+    });
+  }, []);
+
+  // Get question IDs from session storage
+  const questionIds = useMemo(() => {
+    if (typeof window === "undefined") return [];
+    const stored = sessionStorage.getItem("fbti_question_ids");
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return allQuestions.map((_, i) => i + 1);
+      }
+    }
+    return allQuestions.map((_, i) => i + 1);
+  }, []);
+
+  // Filter questions based on questionIds
+  const questions = useMemo(() => {
+    return questionIds
+      .map((id: number) => allQuestions.find((q) => q.id === id))
+      .filter(Boolean);
+  }, [questionIds]);
+
+  // Initialize from sessionStorage
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = sessionStorage.getItem("fbti_answers");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setAnswers(parsed);
+        }
+      } catch {}
+    }
+    setInitialized(true);
+  }, []);
+
+  // Save answers to sessionStorage
+  useEffect(() => {
+    if (initialized && answers.length > 0) {
+      sessionStorage.setItem("fbti_answers", JSON.stringify(answers));
+    }
+  }, [answers, initialized]);
 
   const question = questions[currentQuestion];
   const isMultiSelect = question?.questionType === "multiSelect";
@@ -86,12 +139,15 @@ export default function QuizPage() {
       } else {
         const result = calculateResult(newAnswers);
         sessionStorage.setItem("fbti_result", JSON.stringify(result));
+        // Clean up temporary quiz data
+        sessionStorage.removeItem("fbti_answers");
+        sessionStorage.removeItem("fbti_question_ids");
         setTimeout(() => {
           router.push("/result");
         }, 400);
       }
     },
-    [animating, answers, currentQuestion, router]
+    [animating, answers, currentQuestion, router, questions.length]
   );
 
   const handleBack = useCallback(() => {
@@ -112,6 +168,9 @@ export default function QuizPage() {
   }, []);
 
   const handleConfirmHome = useCallback(() => {
+    sessionStorage.removeItem("fbti_answers");
+    sessionStorage.removeItem("fbti_question_ids");
+    sessionStorage.removeItem("fbti_quiz_version");
     router.push("/");
   }, [router]);
 
@@ -182,12 +241,12 @@ export default function QuizPage() {
 
         {/* Image placeholder */}
         {question.image && (
-          <ImagePlaceholder image={question.image} />
+          <ImagePlaceholder image={question.image} posters={moviePosters} />
         )}
 
         {/* Options */}
         <div className="w-full max-w-md space-y-3 mt-4">
-          {question.options.map((option, index) => {
+          {question.options.map((option: QuestionOption, index: number) => {
             const isSkip = option.type === "skip";
             const isSelected = selectedOptions.includes(index);
 
@@ -300,6 +359,7 @@ function ConfirmModal({ isOpen, onConfirm, onCancel }: ConfirmModalProps) {
 
 function ImagePlaceholder({
   image,
+  posters,
 }: {
   image: {
     type: string;
@@ -307,6 +367,7 @@ function ImagePlaceholder({
     tmdb?: { title_zh: string; title_en: string; year: number; hover: string }[];
     aiPrompts?: { position: string; prompt: string }[];
   };
+  posters: Record<string, string | null>;
 }) {
   const gradients: Record<string, string> = {
     single: "from-amber-900/40 to-gray-900/40",
@@ -316,13 +377,25 @@ function ImagePlaceholder({
   };
 
   if (image.layout === "single") {
+    const film = image.tmdb?.[0];
+    const poster = film ? posters[film.title_zh] : null;
     return (
       <div
-        className={`w-full max-w-sm h-40 rounded-xl bg-gradient-to-br ${gradients.single} border border-gray-700/50 flex items-center justify-center mb-2`}
+        className={`w-full max-w-sm h-48 rounded-xl overflow-hidden border border-gray-700/50 mb-2 ${
+          poster ? "" : `bg-gradient-to-br ${gradients.single}`
+        }`}
       >
-        <span className="text-gray-600 text-xs">
-          {image.tmdb?.[0]?.title_zh ?? "配图占位"}
-        </span>
+        {poster ? (
+          <img
+            src={poster}
+            alt={film?.title_zh}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-gray-600 text-xs">{film?.title_zh ?? "配图占位"}</span>
+          </div>
+        )}
       </div>
     );
   }
@@ -330,18 +403,31 @@ function ImagePlaceholder({
   if (image.layout === "split") {
     return (
       <div className="w-full max-w-sm flex gap-2 mb-2">
-        {image.tmdb?.map((film, i) => (
-          <div
-            key={i}
-            className="flex-1 h-36 rounded-xl bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700/50 flex items-center justify-center"
-          >
-            <span className="text-gray-600 text-xs text-center px-2">
-              {film.title_zh}
-              <br />
-              <span className="text-gray-700">{film.title_en}</span>
-            </span>
-          </div>
-        ))}
+        {image.tmdb?.map((film, i) => {
+          const poster = posters[film.title_zh];
+          return (
+            <div
+              key={i}
+              className="flex-1 h-36 rounded-xl overflow-hidden border border-gray-700/50"
+            >
+              {poster ? (
+                <img
+                  src={poster}
+                  alt={film.title_zh}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-gray-800/60 to-gray-900/60 flex items-center justify-center">
+                  <span className="text-gray-600 text-xs text-center px-2">
+                    {film.title_zh}
+                    <br />
+                    <span className="text-gray-700">{film.title_en}</span>
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })}
         {image.aiPrompts && (
           <>
             <div className="flex-1 h-36 rounded-xl bg-gradient-to-br from-blue-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
@@ -359,16 +445,29 @@ function ImagePlaceholder({
   if (image.layout === "grid3") {
     return (
       <div className="w-full max-w-sm grid grid-cols-3 gap-2 mb-2">
-        {image.tmdb?.map((film, i) => (
-          <div
-            key={i}
-            className="h-28 rounded-lg bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700/50 flex items-center justify-center"
-          >
-            <span className="text-gray-600 text-xs text-center px-1 leading-tight">
-              {film.title_zh}
-            </span>
-          </div>
-        ))}
+        {image.tmdb?.map((film, i) => {
+          const poster = posters[film.title_zh];
+          return (
+            <div
+              key={i}
+              className="h-28 rounded-lg overflow-hidden border border-gray-700/50"
+            >
+              {poster ? (
+                <img
+                  src={poster}
+                  alt={film.title_zh}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-gray-800/60 to-gray-900/60 flex items-center justify-center">
+                  <span className="text-gray-600 text-xs text-center px-1 leading-tight">
+                    {film.title_zh}
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   }
@@ -376,19 +475,53 @@ function ImagePlaceholder({
   if (image.layout === "grid4") {
     return (
       <div className="w-full max-w-sm grid grid-cols-2 gap-2 mb-2">
-        {image.tmdb?.map((film, i) => (
-          <div
-            key={i}
-            className="h-24 rounded-lg bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700/50 flex items-center justify-center"
-          >
-            <span className="text-gray-600 text-xs text-center px-1 leading-tight">
-              {film.title_zh}
-            </span>
-          </div>
-        ))}
+        {image.tmdb?.map((film, i) => {
+          const poster = posters[film.title_zh];
+          return (
+            <div
+              key={i}
+              className="h-24 rounded-lg overflow-hidden border border-gray-700/50"
+            >
+              {poster ? (
+                <img
+                  src={poster}
+                  alt={film.title_zh}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-gray-800/60 to-gray-900/60 flex items-center justify-center">
+                  <span className="text-gray-600 text-xs text-center px-1 leading-tight">
+                    {film.title_zh}
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   }
 
-  return null;
+  // Fallback for ai_placeholder with split layout
+  if (image.layout === "split" && image.aiPrompts) {
+    return (
+      <div className="w-full max-w-sm flex gap-2 mb-2">
+        <div className="flex-1 h-36 rounded-xl bg-gradient-to-br from-blue-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
+          <span className="text-gray-600 text-xs">AI 配图 (左)</span>
+        </div>
+        <div className="flex-1 h-36 rounded-xl bg-gradient-to-br from-amber-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
+          <span className="text-gray-600 text-xs">AI 配图 (右)</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Single AI placeholder
+  return (
+    <div
+      className={`w-full max-w-sm h-40 rounded-xl bg-gradient-to-br ${gradients.single} border border-gray-700/50 flex items-center justify-center mb-2`}
+    >
+      <span className="text-gray-600 text-xs">配图占位</span>
+    </div>
+  );
 }

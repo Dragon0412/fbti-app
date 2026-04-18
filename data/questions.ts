@@ -49,15 +49,15 @@ export const questions: Question[] = [
     id: 1,
     questionType: "binary",
     primaryDimension: "EA",
-    text: "看完一部好电影走出影院，你和朋友最可能的对话开场白是？",
+    text: "看完一部好电影，走出影院时你最想做的事是？",
     options: [
       {
-        label: "\u201c我现在整个人还在那个故事里，先让我缓一缓……\u201d",
+        label: "找个安静的地方待一会儿，让情绪慢慢消化",
         scores: { E: 1 },
         type: "substantive",
       },
       {
-        label: "\u201c你注意到第三幕那个叙事转折的处理了吗？\u201d",
+        label: "立刻找人聊刚才的电影，分析哪里拍得好",
         scores: { A: 1 },
         type: "substantive",
       },
@@ -69,15 +69,15 @@ export const questions: Question[] = [
     id: 2,
     questionType: "binary",
     primaryDimension: "EA",
-    text: "朋友让你推荐一部最近看的好片，你的推荐语更可能是？",
+    text: "朋友让你推荐一部最近看的好片，你会怎么说？",
     options: [
       {
-        label: "\u201c就是那种看完会在回家路上一直想的电影。\u201d",
+        label: "就是那种看完走在回家路上，还会一直回味的电影",
         scores: { E: 1 },
         type: "substantive",
       },
       {
-        label: "\u201c导演用了一种特别聪明的叙事手法，值得研究。\u201d",
+        label: "导演的叙事手法特别聪明，你有空可以仔细看看",
         scores: { A: 1 },
         type: "substantive",
       },
@@ -89,15 +89,15 @@ export const questions: Question[] = [
     id: 3,
     questionType: "binary",
     primaryDimension: "EA",
-    text: "你决定重看一部以前看过的电影，通常是因为？",
+    text: "你会因为什么重看一部看过的电影？",
     options: [
       {
-        label: "想再感受一次那种情绪——可能是温暖，可能是心碎",
+        label: "想再感受一次那种情绪——不管是温暖还是心碎",
         scores: { E: 1 },
         type: "substantive",
       },
       {
-        label: "上次有个细节一直在脑子里转，想回去验证一个判断",
+        label: "有个细节我一直想着，想回去再看一遍确认",
         scores: { A: 1 },
         type: "substantive",
       },
@@ -109,10 +109,10 @@ export const questions: Question[] = [
     id: 4,
     questionType: "binary",
     primaryDimension: "EA",
-    text: "看一部关于真实灾难的纪录片，最牵动你的是？",
+    text: "看一部关于真实灾难的纪录片，什么最触动你？",
     options: [
       {
-        label: "镜头前那些真实人物的面孔和声音",
+        label: "镜头里那些真实人物的面孔和声音",
         scores: { E: 1 },
         hiddenSignals: [
           { attribute: "\u03b4", genre: "documentary", weight: 1 },
@@ -120,7 +120,7 @@ export const questions: Question[] = [
         type: "substantive",
       },
       {
-        label: "导演选择了展示什么、隐藏什么——素材的剪辑和立场",
+        label: "导演为什么选这些素材、剪掉什么——他在表达什么立场",
         scores: { A: 1 },
         hiddenSignals: [
           { attribute: "\u03b2", weight: 1 },
@@ -147,15 +147,15 @@ export const questions: Question[] = [
     id: 5,
     questionType: "binary",
     primaryDimension: "EA",
-    text: "一部电影的摄影和剪辑堪称完美，但你全程没有任何情感波动。你怎么评价？",
+    text: "一部电影摄影和剪辑都特别棒，但你全程没什么感觉。你会觉得？",
     options: [
       {
-        label: "遗憾——再精湛的技术，如果打动不了人，就差了最关键的东西",
+        label: "有点可惜——技术再厉害，打动不了人还是差了点什么",
         scores: { E: 1 },
         type: "substantive",
       },
       {
-        label: "佩服——好电影不一定要煽情，纯粹的形式美本身就是一种极致",
+        label: "挺厉害的——好电影不一定非要煽情，纯粹的形式美也是一种境界",
         scores: { A: 1 },
         hiddenSignals: [{ attribute: "\u03b2", weight: 1 }],
         type: "substantive",
@@ -168,15 +168,15 @@ export const questions: Question[] = [
     id: 6,
     questionType: "binary",
     primaryDimension: "EA",
-    text: "一部豆瓣评分 6.8 的电影，你看完觉得它不好。你的\u201c不好\u201d更接近？",
+    text: "一部豆瓣 6.8 分的电影，你觉得不太好看。你的「不好看」主要来自？",
     options: [
       {
-        label: "\u201c看完之后什么感觉都没有——它没有碰到我。\u201d",
+        label: "看完没什么感觉——它没有真正触动到我",
         scores: { E: 1 },
         type: "substantive",
       },
       {
-        label: "\u201c叙事逻辑有硬伤，角色动机不自洽，主题表达太浅。\u201d",
+        label: "叙事有硬伤，角色行为不合理，主题太浅",
         scores: { A: 1 },
         type: "substantive",
       },
@@ -188,10 +188,10 @@ export const questions: Question[] = [
     id: 7,
     questionType: "binary",
     primaryDimension: "EA",
-    text: "看恐怖片的时候，你的状态更接近？",
+    text: "看恐怖片的时候，你通常是什么状态？",
     options: [
       {
-        label: "身体比脑子先反应——手心出汗、屏住呼吸，被氛围完全裹着走",
+        label: "完全被氛围抓住——手心出汗、屏住呼吸，吓人时真的会吓到",
         scores: { E: 1 },
         hiddenSignals: [
           { attribute: "\u03b4", genre: "horror", weight: 1 },
@@ -199,7 +199,7 @@ export const questions: Question[] = [
         type: "substantive",
       },
       {
-        label: "大脑比身体先反应——\u201c这个 jump scare 的节奏设计得真精准\u201d",
+        label: "脑子里在分析——这个 jump scare 的节奏设计得不错",
         scores: { A: 1 },
         hiddenSignals: [
           { attribute: "\u03b4", genre: "horror", weight: 1 },
@@ -225,15 +225,15 @@ export const questions: Question[] = [
     id: 8,
     questionType: "binary_with_skip",
     primaryDimension: "EA",
-    text: "一部电影的配乐让你印象深刻，你的反应更可能是？",
+    text: "电影的配乐让你印象深刻时，你会怎么做？",
     options: [
       {
-        label: "不需要知道\u201c为什么好\u201d——音乐响起的那一刻，鸡皮疙瘩就是答案",
+        label: "不需要知道为什么好——音乐响起时鸡皮疙瘩起来了就够了",
         scores: { E: 1 },
         type: "substantive",
       },
       {
-        label: "去查这是谁的配乐，用了什么乐器编制，为什么选在这个场景",
+        label: "会去查是谁配的，用了什么乐器，为什么放在这个场景",
         scores: { A: 1 },
         hiddenSignals: [{ attribute: "\u03b2", weight: 2 }],
         type: "substantive",
@@ -264,15 +264,15 @@ export const questions: Question[] = [
     id: 9,
     questionType: "binary",
     primaryDimension: "EA",
-    text: "你觉得一个演员\u201c演得好\u201d，通常是因为？",
+    text: "你觉得一个演员「演得好」，主要是因为？",
     options: [
       {
-        label: "你忘了他在演——那个角色变成了一个活生生的人",
+        label: "完全忘了他在演——角色变成了一个真实的人",
         scores: { E: 1 },
         type: "substantive",
       },
       {
-        label: "你看到了他的技术选择——某个微表情、某处口音变化、某段肢体语言",
+        label: "能看到他的技术——微表情、口音变化、肢体语言的处理",
         scores: { A: 1 },
         hiddenSignals: [{ attribute: "\u03b2", weight: 1 }],
         type: "substantive",
@@ -285,7 +285,7 @@ export const questions: Question[] = [
     id: 10,
     questionType: "binary_with_skip",
     primaryDimension: "EA",
-    text: "一部获的女性主义电影，有人称赞\u201c太有力量了\u201d，也有人批评\u201c太说教了\u201d。你的第一反应？",
+    text: "一部获赞的女性主义电影，有人说「太有力量了」，也有人说「太说教了」。你的第一反应是？",
     options: [
       {
         label: "先想知道它讲了一个什么样的女性故事，有没有打动人",
@@ -293,7 +293,7 @@ export const questions: Question[] = [
         type: "substantive",
       },
       {
-        label: "先想知道导演怎么处理这个议题——是靠叙事自然传达，还是直接给观点",
+        label: "先想知道导演怎么处理这个议题——是靠叙事自然传达，还是直接灌输观点",
         scores: { A: 1 },
         type: "substantive",
       },
@@ -322,7 +322,7 @@ export const questions: Question[] = [
     id: 41,
     questionType: "multi",
     primaryDimension: "EA",
-    text: "一部电影看完之后留在你脑子里的，通常是什么？",
+    text: "看完一部电影后，什么会一直留在你脑子里？",
     options: [
       {
         label: "一句台词——某句话钉在脑子里，隔几个月还会突然冒出来",
@@ -330,19 +330,19 @@ export const questions: Question[] = [
         type: "substantive",
       },
       {
-        label: "一个画面——某个构图、某种光影，像一张照片刻在记忆里",
+        label: "一个画面——某个构图、某种光影，像照片一样印在记忆里",
         scores: { E: 0.5, A: 0.5 },
         hiddenSignals: [{ attribute: "\u03b2", weight: 1 }],
         type: "substantive",
       },
       {
-        label: "一段叙事——故事的结构或某个转折让你忍不住反复回味",
+        label: "故事结构——某个转折或叙事设计让我忍不住反复回味",
         scores: { A: 1 },
         hiddenSignals: [{ attribute: "\u03b2", weight: 1 }],
         type: "substantive",
       },
       {
-        label: "一种氛围——说不清具体是什么，但整部电影的\u201c气质\u201d一直跟着你",
+        label: "一种氛围——说不上来具体是什么，但整部片的气质一直跟着你",
         scores: { E: 1 },
         type: "substantive",
       },
@@ -354,28 +354,28 @@ export const questions: Question[] = [
     id: 42,
     questionType: "multiSelect",
     primaryDimension: "EA",
-    text: "你心目中的\u201c名场面\u201d，是什么样的？（可选 1-2 个）",
+    text: "你心目中的「名场面」是哪一种？（可选 1-2 个）",
     maxSelect: 2,
     options: [
       {
-        label: "视觉奇观——震撼到窒息的画面扑面而来，像太空电梯升空、千军万马长镜头那种",
+        label: "视觉奇观——震撼到窒息的画面扑面而来",
         scores: { A: 0.5, W: 0.5 },
         hiddenSignals: [{ attribute: "\u03b2", weight: 1 }],
         type: "substantive",
       },
       {
-        label: "演员的瞬间——一个眼神、一次嘴角的颤抖，比一万句台词都有力量",
+        label: "演员的瞬间——一个眼神、一次嘴角的颤抖，比台词更有力量",
         scores: { E: 1, P: 0.5 },
         type: "substantive",
       },
       {
-        label: "导演的签名手法——某种特殊的运镜、剪辑或视角，看到就知道是谁拍的",
+        label: "导演的签名——特殊的运镜、剪辑或视角一看就知道是谁拍的",
         scores: { A: 1 },
         hiddenSignals: [{ attribute: "\u03b2", weight: 2 }],
         type: "substantive",
       },
       {
-        label: "经典构图/站位——几个人站在那里，画面本身就是一切",
+        label: "经典构图——几个人往那一站，画面本身就是一个故事",
         scores: { A: 0.5, E: 0.5 },
         hiddenSignals: [{ attribute: "\u03b2", weight: 1 }],
         type: "substantive",
@@ -462,15 +462,15 @@ export const questions: Question[] = [
     id: 11,
     questionType: "binary",
     primaryDimension: "XS",
-    text: "刚看完一部特别喜欢的电影，你更可能做什么？",
+    text: "看完一部特别喜欢的电影后，你通常会？",
     options: [
       {
-        label: "顺藤摸瓜——这导演还拍过什么？演员还演过什么？配乐是谁做的？一路挖下去",
+        label: "顺藤摸瓜——这导演还拍过什么？演员还演过什么？一路挖下去",
         scores: { X: 1 },
         type: "substantive",
       },
       {
-        label: "锁定这个导演——翻出他的片单，一部一部往回补，补完再说",
+        label: "锁定这个导演——翻出他的片单，从头开始一部部补",
         scores: { S: 1 },
         type: "substantive",
       },
@@ -482,16 +482,16 @@ export const questions: Question[] = [
     id: 12,
     questionType: "binary",
     primaryDimension: "XS",
-    text: "连续三个周末各选一部电影看，你的选片轨迹更可能是？",
+    text: "连续三个周末各看一部电影，你的选片通常会？",
     options: [
       {
-        label: "一部韩国犯罪片、一部巴西纪录片、一部法国动画——完全不同方向",
+        label: "跨度很大——韩国犯罪片、巴西纪录片、法国动画，完全不同方向",
         scores: { X: 1 },
         hiddenSignals: [{ attribute: "\u03b3", weight: 1 }],
         type: "substantive",
       },
       {
-        label: "三部都在你最近迷上的同一个方向里——同一个导演或同一个子类型",
+        label: "集中在同一个方向——同一导演或同一类型，一口气看个过瘾",
         scores: { S: 1 },
         type: "substantive",
       },
@@ -503,16 +503,16 @@ export const questions: Question[] = [
     id: 13,
     questionType: "binary",
     primaryDimension: "XS",
-    text: "以下两种片单，哪个更像你的？",
+    text: "你的片单更接近哪种情况？",
     options: [
       {
-        label: "从 1920 年代默片到 2024 年新片都有——跨越一百年",
+        label: "年代跨度很大——从1920年代默片到最近新片，什么年代都有",
         scores: { X: 1 },
         hiddenSignals: [{ attribute: "\u03b1", weight: 2 }],
         type: "substantive",
       },
       {
-        label: "集中在你最了解的那个年代，但那个年代的佳作你几乎看遍了",
+        label: "集中在一个年代——那个时期的佳作我几乎都看遍了",
         scores: { S: 1 },
         type: "substantive",
       },
@@ -540,16 +540,16 @@ export const questions: Question[] = [
     id: 14,
     questionType: "binary",
     primaryDimension: "XS",
-    text: "一个电影节放映一堆你完全没听过的片子。你的反应？",
+    text: "电影节放映一堆你完全没听过的片子，你会怎么做？",
     options: [
       {
-        label: "这就是电影节的意义——如果都是我认识的，还去干嘛",
+        label: "这才是电影节的乐趣——如果都是认识的，还去干嘛",
         scores: { X: 1 },
         hiddenSignals: [{ attribute: "\u03b3", weight: 1 }],
         type: "substantive",
       },
       {
-        label: "会挑几部跟自己方向相关的，不会无差别扫片——时间有限",
+        label: "会挑几部跟「自己方向」相关的，不会全看——时间有限",
         scores: { S: 1 },
         type: "substantive",
       },
@@ -572,7 +572,7 @@ export const questions: Question[] = [
     id: 15,
     questionType: "binary",
     primaryDimension: "XS",
-    text: "你最喜欢的类型里，一部新出的口碑佳作让你失望了。你更可能？",
+    text: "你最喜欢的类型，新出的一部口碑片让你失望了。你会怎么做？",
     options: [
       {
         label: "换换口味——这类型看腻了，正好试试别的",
@@ -580,7 +580,7 @@ export const questions: Question[] = [
         type: "substantive",
       },
       {
-        label: "回去补更早期的经典——可能是我还没找到这个类型真正的精华",
+        label: "回去补早期经典——可能是我还没找到这个类型真正的精华",
         scores: { S: 1 },
         hiddenSignals: [{ attribute: "\u03b1", weight: 1 }],
         type: "substantive",
@@ -593,7 +593,7 @@ export const questions: Question[] = [
     id: 16,
     questionType: "binary_with_skip",
     primaryDimension: "XS",
-    text: "一部评价很高的波斯语电影，你完全不了解伊朗文化。你的反应？",
+    text: "一部评价很高的波斯语电影，但你完全不了解伊朗文化。你会？",
     options: [
       {
         label: "好电影自己会说话——文化差异不是障碍，反而是新鲜感",
@@ -602,12 +602,12 @@ export const questions: Question[] = [
         type: "substantive",
       },
       {
-        label: "更想在自己熟悉的文化圈里找精品——理解背景能让观影体验更深",
+        label: "更想在自己熟悉的文化圈里找精品——了解背景能让观影体验更深",
         scores: { S: 1 },
         type: "substantive",
       },
       {
-        label: "没兴趣——跟文化远不远没关系，就是不想看",
+        label: "没兴趣——文化远不远无所谓，就是不想看",
         scores: {},
         hiddenSignals: [{ attribute: "\u03b3", weight: -1 }],
         type: "skip",

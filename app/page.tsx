@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { questions } from "@/data/questions";
+import Tooltip from "@/components/Tooltip";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -23,8 +24,9 @@ export default function LandingPage() {
     53, // 购票习惯
   ];
 
-  const quickTime = Math.ceil(quickQuestionIds.length * 0.75); // 约18分钟
-  const fullTime = Math.ceil(questions.length * 0.75); // 约40分钟
+  // 精简版:24题,约2分钟;完整版:约5分钟
+  const quickTime = 2; // 简易版 2 分钟
+  const fullTime = 5; // 完整版 5 分钟
 
   const handleStartQuiz = (version: "quick" | "full") => {
     const ids = version === "quick" ? quickQuestionIds : questions.map((_, i) => i + 1);
@@ -75,56 +77,71 @@ export default function LandingPage() {
         {/* Quiz version selection */}
         <div className="flex flex-col gap-4 mb-10">
           {/* Quick version */}
-          <button
-            onClick={() => handleStartQuiz("quick")}
-            className="group relative p-5 bg-[#1a1f35] rounded-xl border border-gray-700 hover:border-amber-500/50
-                       hover:bg-[#222845] transition-all duration-300 text-left"
+          <Tooltip 
+            text="24 道精选题目，快速测试" 
+            mobileHint="24 题 · 约 2 分钟"
           >
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-white font-medium">快速测试</span>
-              <span className="text-amber-400 text-sm font-medium">
-                约 {quickTime} 分钟
-              </span>
-            </div>
-            <div className="text-gray-400 text-sm">
-              {quickQuestionIds.length} 道题 · 快速了解你的电影人格
-            </div>
-            <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity">
-              <span className="text-amber-400">→</span>
-            </div>
-          </button>
+            <button
+              onClick={() => handleStartQuiz("quick")}
+              className="group relative p-5 bg-[#1a1f35] rounded-xl border border-gray-700 hover:border-amber-500/50
+                         hover:bg-[#222845] transition-all duration-300 text-left w-full"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-white font-medium">快速测试</span>
+                <span className="text-amber-400 text-sm font-medium">
+                  约 {quickTime} 分钟
+                </span>
+              </div>
+              <div className="text-gray-400 text-sm">
+                {quickQuestionIds.length} 道题 · 快速了解你的电影人格
+              </div>
+              <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-amber-400">→</span>
+              </div>
+            </button>
+          </Tooltip>
 
           {/* Full version */}
-          <button
-            onClick={() => handleStartQuiz("full")}
-            className="group relative p-5 bg-[#1a1f35] rounded-xl border border-gray-700 hover:border-amber-500/50
-                       hover:bg-[#222845] transition-all duration-300 text-left"
+          <Tooltip 
+            text="完整题库，深度分析你的观影偏好" 
+            mobileHint="完整题库 · 约 5 分钟"
           >
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-white font-medium">完整版测试</span>
-              <span className="text-amber-400 text-sm font-medium">
-                约 {fullTime} 分钟
-              </span>
-            </div>
-            <div className="text-gray-400 text-sm">
-              {questions.length} 道题 · 深入了解你的观影偏好
-            </div>
-            <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity">
-              <span className="text-amber-400">→</span>
-            </div>
-          </button>
+            <button
+              onClick={() => handleStartQuiz("full")}
+              className="group relative p-5 bg-[#1a1f35] rounded-xl border border-gray-700 hover:border-amber-500/50
+                         hover:bg-[#222845] transition-all duration-300 text-left w-full"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-white font-medium">完整版测试</span>
+                <span className="text-amber-400 text-sm font-medium">
+                  约 {fullTime} 分钟
+                </span>
+              </div>
+              <div className="text-gray-400 text-sm">
+                {questions.length} 道题 · 深入了解你的观影偏好
+              </div>
+              <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-amber-400">→</span>
+              </div>
+            </button>
+          </Tooltip>
         </div>
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button
-            onClick={() => router.push("/encyclopedia")}
-            className="px-10 py-3 bg-[#1a1f35] text-gray-300 font-medium text-base rounded-lg
-                       border border-gray-700 hover:bg-[#222845] hover:text-white hover:border-gray-600
-                       transition-all duration-300"
+          <Tooltip 
+            text="查看 16 种电影人格类型详解" 
+            mobileHint="16 种人格类型"
           >
-            探索图鉴
-          </button>
+            <button
+              onClick={() => router.push("/encyclopedia")}
+              className="px-10 py-3 bg-[#1a1f35] text-gray-300 font-medium text-base rounded-lg
+                         border border-gray-700 hover:bg-[#222845] hover:text-white hover:border-gray-600
+                         transition-all duration-300"
+            >
+              探索图鉴
+            </button>
+          </Tooltip>
         </div>
 
         {/* Footer */}

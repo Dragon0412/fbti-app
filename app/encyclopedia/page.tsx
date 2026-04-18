@@ -32,7 +32,7 @@ const dimensions = [
   },
 ];
 
-// 隐藏属性勋章数据
+// 专属印记勋章数据
 const hiddenAttributes = {
   alpha: {
     icon: "α",
@@ -99,12 +99,12 @@ const rarityColors: Record<string, { bg: string; text: string; border: string; b
 
 // 类型基因数据
 const typeGenes = [
-  { key: "horror", label: "幽谷", reveal: "恐怖", desc: "偏好惊悚、悬疑、心理恐惧类叙事" },
-  { key: "comedy", label: "浮生", reveal: "喜剧", desc: "偏好幽默、荒诞、轻松解压的喜剧类型" },
-  { key: "scifi", label: "异境", reveal: "科幻", desc: "偏好未来主义、太空探索、科技伦理类叙事" },
-  { key: "crime", label: "暗局", reveal: "犯罪", desc: "偏好犯罪、黑帮、警匪、法庭类叙事" },
-  { key: "animation", label: "织梦", reveal: "动画", desc: "偏好动画、定格动画、手绘动画等形式" },
-  { key: "documentary", label: "拾真", reveal: "纪录片", desc: "偏好纪实、非虚构、真实事件改编类叙事" },
+  { key: "horror", label: "幽谷", reveal: "恐怖", desc: "偏好惊悚、悬疑、心理恐惧类叙事", color: "#a855f7" },
+  { key: "comedy", label: "浮生", reveal: "喜剧", desc: "偏好幽默、荒诞、轻松解压的喜剧类型", color: "#fbbf24" },
+  { key: "scifi", label: "异境", reveal: "科幻", desc: "偏好未来主义、太空探索、科技伦理类叙事", color: "#06b6d4" },
+  { key: "crime", label: "暗局", reveal: "犯罪", desc: "偏好犯罪、黑帮、警匪、法庭类叙事", color: "#dc2626" },
+  { key: "animation", label: "织梦", reveal: "动画", desc: "偏好动画、定格动画、手绘动画等形式", color: "#f472b6" },
+  { key: "documentary", label: "拾真", reveal: "纪录片", desc: "偏好纪实、非虚构、真实事件改编类叙事", color: "#10b981" },
 ];
 
 // 人格代码颜色配置
@@ -265,10 +265,10 @@ export default function EncyclopediaPage() {
           </div>
         </section>
 
-        {/* Section 3: 隐藏属性勋章体系 */}
+        {/* Section 3: 专属印记勋章体系 */}
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-white mb-8 text-center">
-            <span className="text-amber-400">隐藏</span>属性
+            <span className="text-amber-400">专属</span>印记
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {Object.values(hiddenAttributes).map((attr) => (
@@ -277,7 +277,7 @@ export default function EncyclopediaPage() {
                 className="bg-[#1a1f35] rounded-xl p-6 border border-gray-800"
               >
                 <div className="text-center mb-4">
-                  <span className="text-4xl font-bold text-amber-400">{attr.icon}</span>
+                  <span className={`text-4xl font-bold attr-${attr.icon === 'α' ? 'alpha' : attr.icon === 'β' ? 'beta' : 'gamma'}-icon block`}>{attr.icon}</span>
                   <h3 className="text-lg font-semibold text-white mt-2">{attr.name}</h3>
                   <p className="text-sm text-gray-500">{attr.desc}</p>
                 </div>
@@ -317,10 +317,15 @@ export default function EncyclopediaPage() {
             {typeGenes.map((gene) => (
               <div
                 key={gene.key}
-                className="bg-[#1a1f35] rounded-xl p-4 border border-gray-800 hover:border-gray-700 transition-colors text-center"
+                className={`gene-label rounded-xl p-4 border text-center cursor-default`}
+                style={{
+                  borderColor: `${gene.color}40`,
+                }}
               >
-                <span className="text-2xl font-bold text-amber-400">{gene.label}</span>
-                <p className="text-xs text-gray-500 mt-1">{gene.reveal}</p>
+                <span className={`text-2xl font-bold block mb-1 gene-${gene.key}`}>
+                  {gene.label}
+                </span>
+                <p className="text-xs mt-1" style={{ color: `${gene.color}99` }}>{gene.reveal}</p>
                 <p className="text-xs text-gray-400 mt-2 leading-relaxed">{gene.desc}</p>
               </div>
             ))}

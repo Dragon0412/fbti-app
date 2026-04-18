@@ -7,6 +7,8 @@ import { Result } from "@/utils/calculator";
 import { personalityTypes } from "@/data/types";
 import { questions } from "@/data/questions";
 import html2canvas from "html2canvas";
+import QRCode from "qrcode";
+import Tooltip from "@/components/Tooltip";
 
 const loadingMessages = [
   "正在分析你的观影DNA...",
@@ -68,6 +70,9 @@ export default function ResultPage() {
   const [showContent, setShowContent] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [showCard, setShowCard] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [showImagePreview, setShowImagePreview] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
 
   useEffect(() => {
     const stored = sessionStorage.getItem("fbti_result");
@@ -76,6 +81,23 @@ export default function ResultPage() {
       return;
     }
     setResult(JSON.parse(stored));
+
+    // 生成二维码
+    const currentUrl = window.location.href;
+    QRCode.toDataURL(currentUrl, {
+      width: 120,
+      margin: 1,
+      color: {
+        dark: "#d4a853", // 琥珀色
+        light: "#0a0e1a", // 深色背景
+      },
+    })
+      .then((url) => {
+        setQrCodeUrl(url);
+      })
+      .catch((err) => {
+        console.error("Failed to generate QR code:", err);
+      });
 
     const interval = setInterval(() => {
       setLoadingMessage((prev) => (prev + 1) % loadingMessages.length);
@@ -121,10 +143,11 @@ export default function ResultPage() {
         scrollX: 0,
         scrollY: 0,
       } as never);
-      const link = document.createElement("a");
-      link.download = `FBTI-${result?.type}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+      
+      // 生成图片URL并显示预览
+      const imageUrl = canvas.toDataURL("image/png");
+      setGeneratedImage(imageUrl);
+      setShowImagePreview(true);
     } catch (e) {
       console.error("Failed to generate share card:", e);
     } finally {
@@ -162,6 +185,16 @@ export default function ResultPage() {
   return (
     <main className="min-h-screen py-12 px-6">
       <div className="max-w-lg mx-auto">
+        {/* 二维码 - 右上角 */}
+        {qrCodeUrl && (
+          <div className="fixed top-4 right-4 z-50">
+            <div className="bg-[#1a1f35] p-2 rounded-xl border border-gray-700/50 shadow-lg">
+              <img src={qrCodeUrl} alt="分享二维码" className="w-20 h-20" />
+              <p className="text-[10px] text-gray-500 text-center mt-1">扫码测试</p>
+            </div>
+          </div>
+        )}
+
         {/* Type Code with Rarity Badge */}
         <div className="text-center mb-8">
           <div className="text-amber-400/60 text-sm tracking-[0.3em] uppercase mb-4">
@@ -344,9 +377,9 @@ export default function ResultPage() {
         {/* Hidden Attributes */}
         <div className="bg-[#1a1f35] rounded-2xl p-6 mb-6">
           <h3 className="text-sm text-gray-400 uppercase tracking-wider mb-4">
-            隐藏属性
+            专属印记
           </h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-3 items-stretch">
             <HiddenAttrCard
               icon="α"
               name="时间穿越者"
@@ -418,31 +451,49 @@ export default function ResultPage() {
 
         {/* Actions */}
         <div className="flex flex-col gap-3">
-          <button
-            onClick={handleShare}
-            disabled={generating}
-            className="w-full py-4 bg-[#1a1f35] text-amber-400 font-semibold text-lg rounded-lg
-                       border border-amber-500/30 hover:bg-[#222845] hover:border-amber-500/50
-                       disabled:opacity-50 disabled:cursor-not-allowed
-                       transition-all duration-300"
+          <Tooltip 
+            text="生成精美卡片，分享到社交媒体" 
+            mobileHint="下载分享卡片"
           >
-            {generating ? "生成中..." : "生成分享卡片"}
-          </button>
-          <button
-            onClick={handleRetake}
-            className="w-full py-4 bg-amber-500 text-gray-900 font-semibold text-lg rounded-lg
-                       hover:bg-amber-400 hover:scale-[1.02] transition-all duration-300"
+            <button
+              onClick={handleShare}
+              disabled={generating}
+              className="w-full py-4 bg-[#1a1f35] text-amber-400 font-semibold text-lg rounded-lg
+                         border border-amber-500/30 hover:bg-[#222845] hover:border-amber-500/50
+                         disabled:opacity-50 disabled:cursor-not-allowed
+                         transition-all duration-300"
+            >
+              {generating ? "生成中..." : "生成分享卡片"}
+            </button>
+          </Tooltip>
+          
+          <Tooltip 
+            text="回到首页，重新选择测试类型" 
+            mobileHint="返回首页"
           >
-            再测一次
-          </button>
-          <Link
-            href="/encyclopedia"
-            className="w-full py-4 bg-[#1a1f35] text-gray-300 font-semibold text-lg rounded-lg
-                       border border-gray-700 hover:bg-[#222845] hover:text-white hover:border-gray-600
-                       text-center transition-all duration-300"
+            <button
+              onClick={handleRetake}
+              className="w-full py-4 bg-[#1a1f35] text-gray-300 font-semibold text-lg rounded-lg
+                         border border-gray-700 hover:bg-[#222845] hover:text-white hover:border-gray-600
+                         transition-all duration-300"
+            >
+              返回首页
+            </button>
+          </Tooltip>
+          
+          <Tooltip 
+            text="浏览 16 种电影人格类型详解" 
+            mobileHint="查看所有类型"
           >
-            查看图鉴
-          </Link>
+            <Link
+              href="/encyclopedia"
+              className="w-full py-4 bg-[#1a1f35] text-gray-300 font-semibold text-lg rounded-lg
+                         border border-gray-700 hover:bg-[#222845] hover:text-white hover:border-gray-600
+                         text-center transition-all duration-300"
+            >
+              查看图鉴
+            </Link>
+          </Tooltip>
         </div>
 
         {/* Footer */}
@@ -454,7 +505,44 @@ export default function ResultPage() {
       {/* Share Card — rendered off-screen for html2canvas */}
       {showCard && (
         <div style={{ position: "fixed", left: "-9999px", top: 0 }}>
-          <ShareCardContent result={result} typeData={typeData} />
+          <ShareCardContent result={result} typeData={typeData} qrCodeUrl={qrCodeUrl} />
+        </div>
+      )}
+
+      {/* Image Preview Modal */}
+      {showImagePreview && generatedImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setShowImagePreview(false)}
+        >
+          <div 
+            className="relative max-w-full max-h-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 提示文字 */}
+            <div className="text-center mb-4 text-white">
+              <p className="text-lg font-semibold mb-2">🎉 分享卡片已生成</p>
+              <p className="text-sm text-gray-300">长按图片保存 / 右键保存图片</p>
+            </div>
+            
+            {/* 图片 */}
+            <img 
+              src={generatedImage} 
+              alt="FBTI 分享卡片"
+              className="max-w-full max-h-[80vh] rounded-lg shadow-2xl"
+              style={{ touchAction: 'none' }}
+            />
+            
+            {/* 关闭按钮 */}
+            <button
+              onClick={() => setShowImagePreview(false)}
+              className="absolute -top-2 -right-2 w-8 h-8 bg-gray-800 hover:bg-gray-700 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
     </main>
@@ -462,7 +550,7 @@ export default function ResultPage() {
 }
 
 /** Share card rendered as HTML for html2canvas */
-function ShareCardContent({ result, typeData }: { result: Result; typeData: { name: string; tagline: string; socialLabel: string; description: string } | null }) {
+function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typeData: { name: string; tagline: string; socialLabel: string; description: string } | null; qrCodeUrl?: string }) {
   const amber = "#d4a853";
   const amberDim = "rgba(212, 168, 83, 0.7)";
   const bgCard = "#1a1f35";
@@ -503,12 +591,12 @@ function ShareCardContent({ result, typeData }: { result: Result; typeData: { na
 
   // Radar chart data
   const genes = [
-    { key: "horror", label: "幽谷", reveal: "恐怖" },
-    { key: "comedy", label: "浮生", reveal: "喜剧" },
-    { key: "scifi", label: "异境", reveal: "科幻" },
-    { key: "crime", label: "暗局", reveal: "犯罪" },
-    { key: "animation", label: "织梦", reveal: "动画" },
-    { key: "documentary", label: "拾真", reveal: "纪录片" },
+    { key: "horror", label: "幽谷", reveal: "恐怖", color: "#a855f7" },
+    { key: "comedy", label: "浮生", reveal: "喜剧", color: "#fbbf24" },
+    { key: "scifi", label: "异境", reveal: "科幻", color: "#06b6d4" },
+    { key: "crime", label: "暗局", reveal: "犯罪", color: "#dc2626" },
+    { key: "animation", label: "织梦", reveal: "动画", color: "#f472b6" },
+    { key: "documentary", label: "拾真", reveal: "纪录片", color: "#10b981" },
   ];
   const delta = result.hidden.delta;
   const maxVal = Math.max(...Object.values(delta), 1);
@@ -625,9 +713,6 @@ function ShareCardContent({ result, typeData }: { result: Result; typeData: { na
           <div style={{ fontSize: 13, color: gray400, textTransform: "uppercase", letterSpacing: "0.15em" }}>
             代表导演 & 作品
           </div>
-          <div style={{ fontSize: 11, color: gray500 }}>
-            点击跳转 TMDB →
-          </div>
         </div>
         <div style={{ marginBottom: 12 }}>
           <div style={{ fontSize: 13, color: gray500, marginBottom: 6 }}>代表导演</div>
@@ -656,20 +741,39 @@ function ShareCardContent({ result, typeData }: { result: Result; typeData: { na
       {/* Hidden Attributes */}
       <div style={{ marginBottom: 24, padding: 16, borderRadius: 12, backgroundColor: bgCard }}>
         <div style={{ fontSize: 13, color: gray400, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 12 }}>
-          隐藏属性
+          专属印记
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
           {[
-            { icon: "α", name: "时间穿越者", rarity: result.hidden.alpha.rarity, label: result.hidden.alpha.label },
-            { icon: "β", name: "形式感应器", rarity: result.hidden.beta.rarity, label: result.hidden.beta.label },
-            { icon: "γ", name: "文化通行证", rarity: result.hidden.gamma.rarity, label: result.hidden.gamma.label },
+            { icon: "α", name: "时间穿越者", rarity: result.hidden.alpha.rarity, label: result.hidden.alpha.label, gradient: "linear-gradient(135deg, #f9fafb 0%, #d1d5db 50%, #9ca3af 100%)" },
+            { icon: "β", name: "形式感应器", rarity: result.hidden.beta.rarity, label: result.hidden.beta.label, gradient: "linear-gradient(135deg, #c4b5fd 0%, #a78bfa 50%, #7c3aed 100%)" },
+            { icon: "γ", name: "文化通行证", rarity: result.hidden.gamma.rarity, label: result.hidden.gamma.label, gradient: "linear-gradient(135deg, #6ee7b7 0%, #34d399 50%, #059669 100%)" },
           ].map((attr) => {
             const colors = hiddenAttrRarityColors[attr.rarity] ?? hiddenAttrRarityColors.common;
             return (
-              <div key={attr.icon} style={{ backgroundColor: "#222845", borderRadius: 12, padding: "12px 6px", textAlign: "center" }}>
-                <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>{attr.icon}</div>
-                <div style={{ fontSize: 12, color: gray300, marginBottom: 8, whiteSpace: "nowrap" }}>{attr.name}</div>
-                <span style={{ display: "inline-block", padding: "4px 8px", borderRadius: 9999, fontSize: 13, lineHeight: "normal", backgroundColor: colors.bg, color: colors.text, whiteSpace: "nowrap" }}>
+              <div key={attr.icon} style={{ backgroundColor: "#222845", borderRadius: 12, padding: "12px 8px", border: "1px solid rgba(107,114,128,0.2)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", height: "100%" }}>
+                {/* 图标 - 顶部 */}
+                <div style={{ 
+                  fontSize: 28, 
+                  fontWeight: 700, 
+                  background: attr.gradient,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  filter: "drop-shadow(0 0 8px rgba(255,255,255,0.3))",
+                  minHeight: "48px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%",
+                  padding: "8px 0"
+                }}>{attr.icon}</div>
+                
+                {/* 名称 - 中间 */}
+                <div style={{ fontSize: 11, color: gray300, textAlign: "center", lineHeight: "1.3", margin: "4px 0" }}>{attr.name}</div>
+                
+                {/* 标签 - 底部 */}
+                <span style={{ display: "inline-block", padding: "4px 10px", borderRadius: 9999, fontSize: 12, lineHeight: "normal", backgroundColor: colors.bg, color: colors.text, fontWeight: 500 }}>
                   {attr.label}
                 </span>
               </div>
@@ -722,21 +826,24 @@ function ShareCardContent({ result, typeData }: { result: Result; typeData: { na
               }
               return (
                 <g key={i}>
-                  <circle cx={dotX} cy={dotY} r="4" fill={amber} />
+                  {/* 点 - 琥珀色 */}
+                  <circle cx={dotX} cy={dotY} r="4" fill="#d4a853" />
+                  {/* 文字 - 直接使用内联样式,确保html2canvas能捕获 */}
                   <text
                     x={labelX}
-                    y={labelY - 7}
+                    y={labelY - 5}
                     textAnchor={anchor}
                     dominantBaseline="central"
-                    fill="#c9cdd4"
+                    fill={g.color}
                     fontSize="16"
                     fontFamily="'Noto Serif SC', serif"
+                    fontWeight="600"
                   >
                     {g.label}
                   </text>
                   <text
                     x={labelX}
-                    y={labelY + 10}
+                    y={labelY + 12}
                     textAnchor={anchor}
                     dominantBaseline="central"
                     fill="rgba(212, 168, 83, 0.75)"
@@ -787,7 +894,14 @@ function ShareCardContent({ result, typeData }: { result: Result; typeData: { na
 
       {/* Footer */}
       <div style={{ textAlign: "center", paddingTop: 16, borderTop: "1px solid #1f2937" }}>
-        <div style={{ fontSize: 13, color: "#6b7280" }}>FBTI &mdash; Film Buff Type Indicator</div>
+        <div style={{ fontSize: 13, color: "#6b7280", marginBottom: 12 }}>FBTI &mdash; Film Buff Type Indicator</div>
+        {/* 二维码 */}
+        {qrCodeUrl && (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+            <img src={qrCodeUrl} alt="分享二维码" style={{ width: 100, height: 100 }} />
+            <div style={{ fontSize: 11, color: "#6b7280" }}>扫码发现你的电影人格</div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -807,11 +921,20 @@ function HiddenAttrCard({
   score: number;
 }) {
   const colorClass = RARITY_COLORS[rarity] ?? RARITY_COLORS.common;
+  const attrClass = icon === 'α' ? 'attr-alpha-icon' : icon === 'β' ? 'attr-beta-icon' : 'attr-gamma-icon';
+  
   return (
-    <div className="bg-[#222845] rounded-xl p-3 text-center">
-      <div className="text-2xl mb-1">{icon}</div>
-      <p className="text-xs text-gray-300 mb-1">{name}</p>
-      <span className={`inline-block px-2 py-0.5 rounded-full text-xs ${colorClass}`}>
+    <div className="bg-[#222845] rounded-xl p-3 border border-gray-800 hover:border-gray-700 transition-all flex flex-col items-center justify-between h-full">
+      {/* 图标区域 - 顶部 */}
+      <div className={`text-3xl ${attrClass} flex items-center justify-center w-full`} style={{ minHeight: '48px', padding: '8px 0' }}>
+        {icon}
+      </div>
+      
+      {/* 名称 - 中间 */}
+      <p className="text-xs text-gray-300 text-center leading-tight my-1">{name}</p>
+      
+      {/* 标签 - 底部 */}
+      <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${colorClass}`}>
         {label}
       </span>
     </div>
@@ -830,12 +953,12 @@ function ProfileRow({ label, value }: { label: string; value: string }) {
 function DeltaRadarChart({ delta }: { delta: Record<string, number> }) {
   const [hovered, setHovered] = useState<number | null>(null);
   const genes = [
-    { key: "horror", label: "幽谷", reveal: "恐怖", desc: "偏好惊悚、悬疑、心理恐惧类叙事" },
-    { key: "comedy", label: "浮生", reveal: "喜剧", desc: "偏好幽默、荒诞、轻松解压的喜剧类型" },
-    { key: "scifi", label: "异境", reveal: "科幻", desc: "偏好未来主义、太空探索、科技伦理类叙事" },
-    { key: "crime", label: "暗局", reveal: "犯罪", desc: "偏好犯罪、黑帮、警匪、法庭类叙事" },
-    { key: "animation", label: "织梦", reveal: "动画", desc: "偏好动画、定格动画、手绘动画等形式" },
-    { key: "documentary", label: "拾真", reveal: "纪录片", desc: "偏好纪实、非虚构、真实事件改编类叙事" },
+    { key: "horror", label: "幽谷", reveal: "恐怖", desc: "偏好惊悚、悬疑、心理恐惧类叙事", color: "#a855f7" },
+    { key: "comedy", label: "浮生", reveal: "喜剧", desc: "偏好幽默、荒诞、轻松解压的喜剧类型", color: "#fbbf24" },
+    { key: "scifi", label: "异境", reveal: "科幻", desc: "偏好未来主义、太空探索、科技伦理类叙事", color: "#06b6d4" },
+    { key: "crime", label: "暗局", reveal: "犯罪", desc: "偏好犯罪、黑帮、警匪、法庭类叙事", color: "#dc2626" },
+    { key: "animation", label: "织梦", reveal: "动画", desc: "偏好动画、定格动画、手绘动画等形式", color: "#f472b6" },
+    { key: "documentary", label: "拾真", reveal: "纪录片", desc: "偏好纪实、非虚构、真实事件改编类叙事", color: "#10b981" },
   ];
 
   const maxVal = Math.max(...Object.values(delta), 1);
@@ -890,12 +1013,18 @@ function DeltaRadarChart({ delta }: { delta: Record<string, number> }) {
               onMouseLeave={() => setHovered(null)}
               style={{ cursor: "help" }}
             >
+              {/* 透明触摸区域 */}
               <circle cx={dotX} cy={dotY} r="20" fill="transparent" />
+              {/* 点 - 使用默认琥珀色 */}
               <circle cx={dotX} cy={dotY} r={isHovered ? 7 : 5} fill="#d4a853" style={{ transition: "r 0.15s ease" }} />
-              {isHovered && <circle cx={dotX} cy={dotY} r="10" fill="none" stroke="#d4a853" strokeWidth="1" opacity={0.4} />}
-              <text x={labelX} y={labelY} textAnchor={anchor} dominantBaseline="middle" fill={isHovered ? "#f0ece4" : "#c9cdd4"} fontSize="15" fontFamily="'Noto Serif SC', serif" style={{ transition: "fill 0.15s ease" }}>
-                {g.label}
-              </text>
+              {isHovered && <circle cx={dotX} cy={dotY} r="12" fill="none" stroke="#d4a853" strokeWidth="1.5" opacity={0.6} />}
+              {isHovered && <circle cx={dotX} cy={dotY} r="15" fill="#d4a853" opacity={0.2} />}
+              {/* 文字 - 使用对应基因颜色和CSS类 */}
+              <foreignObject x={labelX - 40} y={labelY - 15} width="80" height="30">
+                <div xmlns="http://www.w3.org/1999/xhtml" className={`gene-label gene-${g.key}`} style={{ textAlign: "center", padding: "4px 8px", fontSize: "15px", fontWeight: isHovered ? "700" : "400" }}>
+                  {g.label}
+                </div>
+              </foreignObject>
             </g>
           );
         })}
@@ -910,8 +1039,8 @@ function DeltaRadarChart({ delta }: { delta: Record<string, number> }) {
         }}
       >
         {hovered !== null && (
-          <div className="inline-block px-4 py-2 rounded-lg border border-amber-500/20 bg-[#1a1f35]/95">
-            <span className="text-amber-400 font-semibold text-sm">{genes[hovered].label} → {genes[hovered].reveal}</span>
+          <div className="inline-block px-4 py-2 rounded-lg border bg-[#1a1f35]/95" style={{ borderColor: `${genes[hovered].color}40`, boxShadow: `0 0 20px ${genes[hovered].color}20` }}>
+            <span className="font-semibold text-sm" style={{ color: genes[hovered].color }}>{genes[hovered].label} → {genes[hovered].reveal}</span>
             <span className="text-gray-400 text-xs ml-1.5">({delta[genes[hovered].key] ?? 0})</span>
             <p className="text-gray-300 text-xs mt-0.5 mb-0">{genes[hovered].desc}</p>
           </div>

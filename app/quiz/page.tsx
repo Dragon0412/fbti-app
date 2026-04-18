@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { questions as allQuestions, QuestionOption } from "@/data/questions";
 import { calculateResult, Result } from "@/utils/calculator";
 import { getPosterUrl, initMoviePosters } from "@/utils/tmdb";
+import Tooltip from "@/components/Tooltip";
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -194,23 +195,29 @@ export default function QuizPage() {
 
       {/* Header */}
       <div className="px-6 pt-6 pb-4 flex items-center justify-between">
-        <button
-          onClick={handleBack}
-          disabled={currentQuestion === 0}
-          className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm flex items-center gap-1"
-        >
-          <span>←</span>
-          <span>上一题</span>
-        </button>
+        <Tooltip text="返回上一道题目" position="bottom">
+          <button
+            onClick={handleBack}
+            disabled={currentQuestion === 0}
+            className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm flex items-center gap-1"
+          >
+            <span>←</span>
+            <span>上一题</span>
+          </button>
+        </Tooltip>
+        
         <span className="text-gray-400 text-sm">
           {currentQuestion + 1} / {questions.length}
         </span>
-        <button
-          onClick={handleHomeClick}
-          className="text-gray-500 hover:text-gray-300 transition-colors text-xs"
-        >
-          返回主页
-        </button>
+        
+        <Tooltip text="返回主页，进度不会保存" position="bottom">
+          <button
+            onClick={handleHomeClick}
+            className="text-gray-500 hover:text-gray-300 transition-colors text-xs"
+          >
+            返回主页
+          </button>
+        </Tooltip>
       </div>
 
       {/* Confirm Modal */}
@@ -381,18 +388,29 @@ function ImagePlaceholder({
     const poster = film ? posters[film.title_zh] : null;
     return (
       <div
-        className={`w-full max-w-sm h-48 rounded-xl overflow-hidden border border-gray-700/50 mb-2 ${
-          poster ? "" : `bg-gradient-to-br ${gradients.single}`
+        className={`w-full max-w-xs mx-auto mb-4 ${
+          poster ? "" : ""
         }`}
       >
         {poster ? (
-          <img
-            src={poster}
-            alt={film?.title_zh}
-            className="w-full h-full object-cover"
-          />
+          <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden border border-gray-700/50 shadow-lg">
+            <img
+              src={poster}
+              alt={film?.title_zh}
+              className="w-full h-full object-cover"
+            />
+            {/* 电影标题浮层 */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+              <p className="text-white text-sm font-medium">{film?.title_zh}</p>
+              {film?.title_en && film.title_en !== film.title_zh && (
+                <p className="text-gray-300 text-xs mt-0.5">{film.title_en}</p>
+              )}
+            </div>
+          </div>
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
+          <div
+            className={`w-full aspect-[2/3] rounded-xl overflow-hidden border border-gray-700/50 bg-gradient-to-br ${gradients.single} flex items-center justify-center`}
+          >
             <span className="text-gray-600 text-xs">{film?.title_zh ?? "配图占位"}</span>
           </div>
         )}
@@ -402,22 +420,28 @@ function ImagePlaceholder({
 
   if (image.layout === "split") {
     return (
-      <div className="w-full max-w-sm flex gap-2 mb-2">
+      <div className="w-full max-w-sm mx-auto flex gap-3 mb-4">
         {image.tmdb?.map((film, i) => {
           const poster = posters[film.title_zh];
           return (
             <div
               key={i}
-              className="flex-1 h-36 rounded-xl overflow-hidden border border-gray-700/50"
+              className="flex-1"
             >
               {poster ? (
-                <img
-                  src={poster}
-                  alt={film.title_zh}
-                  className="w-full h-full object-cover"
-                />
+                <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden border border-gray-700/50 shadow-lg">
+                  <img
+                    src={poster}
+                    alt={film.title_zh}
+                    className="w-full h-full object-cover"
+                  />
+                  {/* 电影标题浮层 */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                    <p className="text-white text-xs font-medium">{film.title_zh}</p>
+                  </div>
+                </div>
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-gray-800/60 to-gray-900/60 flex items-center justify-center">
+                <div className="w-full aspect-[2/3] rounded-xl bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700/50 flex items-center justify-center">
                   <span className="text-gray-600 text-xs text-center px-2">
                     {film.title_zh}
                     <br />
@@ -430,10 +454,10 @@ function ImagePlaceholder({
         })}
         {image.aiPrompts && (
           <>
-            <div className="flex-1 h-36 rounded-xl bg-gradient-to-br from-blue-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
+            <div className="flex-1 aspect-[2/3] rounded-xl bg-gradient-to-br from-blue-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
               <span className="text-gray-600 text-xs">AI 配图 (左)</span>
             </div>
-            <div className="flex-1 h-36 rounded-xl bg-gradient-to-br from-amber-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
+            <div className="flex-1 aspect-[2/3] rounded-xl bg-gradient-to-br from-amber-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
               <span className="text-gray-600 text-xs">AI 配图 (右)</span>
             </div>
           </>
@@ -444,23 +468,29 @@ function ImagePlaceholder({
 
   if (image.layout === "grid3") {
     return (
-      <div className="w-full max-w-sm grid grid-cols-3 gap-2 mb-2">
+      <div className="w-full max-w-sm mx-auto grid grid-cols-3 gap-3 mb-4">
         {image.tmdb?.map((film, i) => {
           const poster = posters[film.title_zh];
           return (
             <div
               key={i}
-              className="h-28 rounded-lg overflow-hidden border border-gray-700/50"
+              className=""
             >
               {poster ? (
-                <img
-                  src={poster}
-                  alt={film.title_zh}
-                  className="w-full h-full object-cover"
-                />
+                <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden border border-gray-700/50 shadow-md">
+                  <img
+                    src={poster}
+                    alt={film.title_zh}
+                    className="w-full h-full object-cover"
+                  />
+                  {/* 电影标题浮层 */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5">
+                    <p className="text-white text-[10px] font-medium leading-tight">{film.title_zh}</p>
+                  </div>
+                </div>
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-gray-800/60 to-gray-900/60 flex items-center justify-center">
-                  <span className="text-gray-600 text-xs text-center px-1 leading-tight">
+                <div className="w-full aspect-[2/3] rounded-lg bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700/50 flex items-center justify-center">
+                  <span className="text-gray-600 text-[10px] text-center px-1 leading-tight">
                     {film.title_zh}
                   </span>
                 </div>
@@ -474,23 +504,29 @@ function ImagePlaceholder({
 
   if (image.layout === "grid4") {
     return (
-      <div className="w-full max-w-sm grid grid-cols-2 gap-2 mb-2">
+      <div className="w-full max-w-sm mx-auto grid grid-cols-2 gap-3 mb-4">
         {image.tmdb?.map((film, i) => {
           const poster = posters[film.title_zh];
           return (
             <div
               key={i}
-              className="h-24 rounded-lg overflow-hidden border border-gray-700/50"
+              className=""
             >
               {poster ? (
-                <img
-                  src={poster}
-                  alt={film.title_zh}
-                  className="w-full h-full object-cover"
-                />
+                <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden border border-gray-700/50 shadow-md">
+                  <img
+                    src={poster}
+                    alt={film.title_zh}
+                    className="w-full h-full object-cover"
+                  />
+                  {/* 电影标题浮层 */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5">
+                    <p className="text-white text-[10px] font-medium leading-tight">{film.title_zh}</p>
+                  </div>
+                </div>
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-gray-800/60 to-gray-900/60 flex items-center justify-center">
-                  <span className="text-gray-600 text-xs text-center px-1 leading-tight">
+                <div className="w-full aspect-[2/3] rounded-lg bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700/50 flex items-center justify-center">
+                  <span className="text-gray-600 text-[10px] text-center px-1 leading-tight">
                     {film.title_zh}
                   </span>
                 </div>

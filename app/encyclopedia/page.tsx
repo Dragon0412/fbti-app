@@ -39,8 +39,8 @@ const hiddenAttributes = {
     name: "时间穿越者",
     desc: "你的影史跨度",
     levels: [
-      { rarity: "common", label: "当代观众", desc: "主要关注近年电影" },
-      { rarity: "uncommon", label: "跨代观众", desc: "跨越不同年代观影" },
+      { rarity: "common", label: "影院漫步者", desc: "主要关注近年电影" },
+      { rarity: "uncommon", label: "十年藏家", desc: "跨越不同年代观影" },
       { rarity: "rare", label: "影史漫游者", desc: "广泛涉猎影史各时期" },
       { rarity: "legendary", label: "时间旅人", desc: "真正的影史百科" },
     ],
@@ -53,7 +53,7 @@ const hiddenAttributes = {
       { rarity: "common", label: "故事优先", desc: "更关注故事本身" },
       { rarity: "uncommon", label: "氛围捕手", desc: "开始注意视听语言" },
       { rarity: "rare", label: "感官猎人", desc: "对电影形式高度敏感" },
-      { rarity: "legendary", label: "通感者", desc: "视听形式的极致感知" },
+      { rarity: "legendary", label: "影像魔法师", desc: "视听形式的极致感知" },
     ],
   },
   gamma: {
@@ -61,7 +61,7 @@ const hiddenAttributes = {
     name: "文化通行证",
     desc: "你的国际观影广度",
     levels: [
-      { rarity: "common", label: "主流观众", desc: "以主流好莱坞为主" },
+      { rarity: "common", label: "本土影迷", desc: "以主流好莱坞为主" },
       { rarity: "uncommon", label: "邻国通", desc: "开始接触亚洲/欧洲电影" },
       { rarity: "rare", label: "世界公民", desc: "广泛接触各国电影" },
       { rarity: "legendary", label: "无国界影人", desc: "真正的世界电影公民" },
@@ -103,8 +103,8 @@ const typeGenes = [
   { key: "comedy", label: "浮生", reveal: "喜剧", desc: "偏好幽默、荒诞、轻松解压的喜剧类型", color: "#fbbf24" },
   { key: "scifi", label: "异境", reveal: "科幻", desc: "偏好未来主义、太空探索、科技伦理类叙事", color: "#06b6d4" },
   { key: "crime", label: "暗局", reveal: "犯罪", desc: "偏好犯罪、黑帮、警匪、法庭类叙事", color: "#dc2626" },
-  { key: "animation", label: "织梦", reveal: "动画", desc: "偏好动画、定格动画、手绘动画等形式", color: "#f472b6" },
-  { key: "documentary", label: "拾真", reveal: "纪录片", desc: "偏好纪实、非虚构、真实事件改编类叙事", color: "#10b981" },
+  { key: "romance", label: "情澜", reveal: "爱情/言情", desc: "偏好爱情、言情、浪漫关系类叙事", color: "#ff6b9d" },
+  { key: "action", label: "烈风", reveal: "动作/冒险", desc: "偏好动作、冒险、追逐、战斗类叙事", color: "#ff4500" },
 ];
 
 // 人格代码颜色配置

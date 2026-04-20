@@ -472,7 +472,7 @@ export default function ResultPage() {
                       : "border-blue-500/50 bg-blue-500/10"
                   }`}
                 >
-                  <span className="text-lg">{attr.name}</span>
+                  <span className={`text-lg ${attr.name === 'α' ? 'attr-alpha-icon' : attr.name === 'β' ? 'attr-beta-icon' : 'attr-gamma-icon'}`}>{attr.name}</span>
                   <span
                     className={`text-sm font-medium ${
                       attr.rarity === "legendary"
@@ -1072,7 +1072,7 @@ function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typ
                   backgroundColor: attr.rarity === "legendary" ? "rgba(245,158,11,0.1)" : "rgba(59,130,246,0.1)",
                 }}
               >
-                <span style={{ fontSize: 18 }}>{attr.name}</span>
+                <span style={{ fontSize: 18, color: attr.name === 'α' ? '#ee5a6f' : attr.name === 'β' ? '#a78bfa' : '#34d399' }}>{attr.name}</span>
                 <span
                   style={{
                     fontSize: 14,

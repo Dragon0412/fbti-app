@@ -88,9 +88,12 @@ export default function QuizPage() {
 
   // Sync selectedOptions when currentQuestion changes
   useEffect(() => {
-    const answer = answers.find(a => a.questionIndex === currentQuestion);
+    const currentQ = questions[currentQuestion];
+    if (!currentQ) return;
+    const fullIdx = allQuestions.findIndex(q => q.id === currentQ.id);
+    const answer = answers.find(a => a.questionIndex === fullIdx);
     setSelectedOptions(answer?.optionIndices ?? []);
-  }, [currentQuestion, answers]);
+  }, [currentQuestion, answers, questions]);
 
   const handleOptionClick = useCallback(
     (optIdx: number) => {
@@ -127,10 +130,13 @@ export default function QuizPage() {
       if (animating) return;
       setAnimating(true);
 
+      // Use the full array index so calculator.ts maps to the correct question
+      const currentQ = questions[currentQuestion];
+      const fullArrayIndex = allQuestions.findIndex(q => q.id === currentQ.id);
       const newAnswers = answers.filter(
-        (a) => a.questionIndex !== currentQuestion
+        (a) => a.questionIndex !== fullArrayIndex
       );
-      newAnswers.push({ questionIndex: currentQuestion, optionIndices: opts });
+      newAnswers.push({ questionIndex: fullArrayIndex, optionIndices: opts });
       setAnswers(newAnswers);
 
       if (currentQuestion < questions.length - 1) {
@@ -150,19 +156,21 @@ export default function QuizPage() {
         }, 400);
       }
     },
-    [animating, answers, currentQuestion, router, questions.length]
+    [animating, answers, currentQuestion, router, questions]
   );
 
   const handleBack = useCallback(() => {
     if (currentQuestion > 0) {
       const prevIdx = currentQuestion - 1;
+      const prevQ = questions[prevIdx];
+      const prevFullIdx = allQuestions.findIndex(q => q.id === prevQ.id);
       const prevAnswer = answers.find(
-        (a) => a.questionIndex === prevIdx
+        (a) => a.questionIndex === prevFullIdx
       );
       setCurrentQuestion(prevIdx);
       setSelectedOptions(prevAnswer?.optionIndices ?? []);
     }
-  }, [currentQuestion, answers]);
+  }, [currentQuestion, answers, questions]);
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 

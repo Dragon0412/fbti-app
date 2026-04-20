@@ -163,13 +163,13 @@ export default function EncyclopediaPage() {
                 </div>
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex-1 text-center p-3 bg-[#0a0e1a] rounded-lg">
-                    <span className="text-2xl font-bold text-amber-400">{dim.left.code}</span>
+                    <span className="text-2xl font-bold text-amber-400 font-playfair">{dim.left.code}</span>
                     <p className="text-sm font-medium text-white mt-1">{dim.left.name}</p>
                     <p className="text-xs text-gray-500 mt-1">{dim.left.desc}</p>
                   </div>
                   <span className="text-gray-600 font-light">vs</span>
                   <div className="flex-1 text-center p-3 bg-[#0a0e1a] rounded-lg">
-                    <span className="text-2xl font-bold text-blue-400">{dim.right.code}</span>
+                    <span className="text-2xl font-bold text-blue-400 font-playfair">{dim.right.code}</span>
                     <p className="text-sm font-medium text-white mt-1">{dim.right.name}</p>
                     <p className="text-xs text-gray-500 mt-1">{dim.right.desc}</p>
                   </div>

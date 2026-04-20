@@ -84,11 +84,13 @@ export default function QuizPage() {
   const isMulti = question?.questionType === "multi";
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
-  // When navigating to a question, restore any existing answer
-  const existingAnswer = answers.find(
-    (a) => a.questionIndex === currentQuestion
-  );
   const canAdvance = selectedOptions.length > 0;
+
+  // Sync selectedOptions when currentQuestion changes
+  useEffect(() => {
+    const answer = answers.find(a => a.questionIndex === currentQuestion);
+    setSelectedOptions(answer?.optionIndices ?? []);
+  }, [currentQuestion, answers]);
 
   const handleOptionClick = useCallback(
     (optIdx: number) => {
@@ -231,7 +233,7 @@ export default function QuizPage() {
 
       {/* Question content */}
       <div
-        className={`flex-1 flex flex-col items-center justify-center px-6 pb-12 transition-all duration-300 ${
+        className={`flex-1 flex flex-col items-center justify-start pt-2 px-6 pb-4 transition-all duration-300 ${
           animating ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0"
         }`}
       >
@@ -283,7 +285,7 @@ export default function QuizPage() {
                         ? "border-amber-500 bg-amber-500/10 text-white"
                         : "border-gray-700 bg-[#1a1f35] hover:border-amber-500/50 hover:bg-[#222845]"
                   }
-                  focus:outline-none focus:ring-2 focus:ring-amber-500/50`}
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50`}
               >
                 <div className="flex items-start gap-3">
                   {/* Radio/Checkbox indicator */}
@@ -387,29 +389,25 @@ function ImagePlaceholder({
     const film = image.tmdb?.[0];
     const poster = film ? posters[film.title_zh] : null;
     return (
-      <div
-        className={`w-full max-w-xs mx-auto mb-4 ${
-          poster ? "" : ""
-        }`}
-      >
+      <div className="w-full max-w-[140px] md:max-w-[180px] mx-auto mb-3">
         {poster ? (
-          <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden border border-gray-700/50 shadow-lg">
+          <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden border border-gray-700/50 shadow-lg">
             <img
               src={poster}
               alt={film?.title_zh}
               className="w-full h-full object-cover"
             />
             {/* 电影标题浮层 */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-              <p className="text-white text-sm font-medium">{film?.title_zh}</p>
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+              <p className="text-white text-xs font-medium">{film?.title_zh}</p>
               {film?.title_en && film.title_en !== film.title_zh && (
-                <p className="text-gray-300 text-xs mt-0.5">{film.title_en}</p>
+                <p className="text-gray-300 text-[10px] mt-0.5">{film.title_en}</p>
               )}
             </div>
           </div>
         ) : (
           <div
-            className={`w-full aspect-[2/3] rounded-xl overflow-hidden border border-gray-700/50 bg-gradient-to-br ${gradients.single} flex items-center justify-center`}
+            className={`w-full aspect-[2/3] rounded-lg overflow-hidden border border-gray-700/50 bg-gradient-to-br ${gradients.single} flex items-center justify-center`}
           >
             <span className="text-gray-600 text-xs">{film?.title_zh ?? "配图占位"}</span>
           </div>
@@ -420,62 +418,11 @@ function ImagePlaceholder({
 
   if (image.layout === "split") {
     return (
-      <div className="w-full max-w-sm mx-auto flex gap-3 mb-4">
+      <div className="w-full max-w-[280px] md:max-w-[360px] mx-auto flex gap-2 mb-3">
         {image.tmdb?.map((film, i) => {
           const poster = posters[film.title_zh];
           return (
-            <div
-              key={i}
-              className="flex-1"
-            >
-              {poster ? (
-                <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden border border-gray-700/50 shadow-lg">
-                  <img
-                    src={poster}
-                    alt={film.title_zh}
-                    className="w-full h-full object-cover"
-                  />
-                  {/* 电影标题浮层 */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-                    <p className="text-white text-xs font-medium">{film.title_zh}</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="w-full aspect-[2/3] rounded-xl bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700/50 flex items-center justify-center">
-                  <span className="text-gray-600 text-xs text-center px-2">
-                    {film.title_zh}
-                    <br />
-                    <span className="text-gray-700">{film.title_en}</span>
-                  </span>
-                </div>
-              )}
-            </div>
-          );
-        })}
-        {image.aiPrompts && (
-          <>
-            <div className="flex-1 aspect-[2/3] rounded-xl bg-gradient-to-br from-blue-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
-              <span className="text-gray-600 text-xs">AI 配图 (左)</span>
-            </div>
-            <div className="flex-1 aspect-[2/3] rounded-xl bg-gradient-to-br from-amber-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
-              <span className="text-gray-600 text-xs">AI 配图 (右)</span>
-            </div>
-          </>
-        )}
-      </div>
-    );
-  }
-
-  if (image.layout === "grid3") {
-    return (
-      <div className="w-full max-w-sm mx-auto grid grid-cols-3 gap-3 mb-4">
-        {image.tmdb?.map((film, i) => {
-          const poster = posters[film.title_zh];
-          return (
-            <div
-              key={i}
-              className=""
-            >
+            <div key={i} className="flex-1">
               {poster ? (
                 <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden border border-gray-700/50 shadow-md">
                   <img
@@ -485,12 +432,55 @@ function ImagePlaceholder({
                   />
                   {/* 电影标题浮层 */}
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5">
-                    <p className="text-white text-[10px] font-medium leading-tight">{film.title_zh}</p>
+                    <p className="text-white text-[10px] font-medium">{film.title_zh}</p>
                   </div>
                 </div>
               ) : (
                 <div className="w-full aspect-[2/3] rounded-lg bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700/50 flex items-center justify-center">
                   <span className="text-gray-600 text-[10px] text-center px-1 leading-tight">
+                    {film.title_zh}
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {image.aiPrompts && (
+          <>
+            <div className="flex-1 aspect-[2/3] rounded-lg bg-gradient-to-br from-blue-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
+              <span className="text-gray-600 text-[10px]">AI 配图 (左)</span>
+            </div>
+            <div className="flex-1 aspect-[2/3] rounded-lg bg-gradient-to-br from-amber-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
+              <span className="text-gray-600 text-[10px]">AI 配图 (右)</span>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  if (image.layout === "grid3") {
+    return (
+      <div className="w-full max-w-[280px] md:max-w-[360px] mx-auto grid grid-cols-3 gap-2 mb-3">
+        {image.tmdb?.map((film, i) => {
+          const poster = posters[film.title_zh];
+          return (
+            <div key={i}>
+              {poster ? (
+                <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden border border-gray-700/50 shadow-sm">
+                  <img
+                    src={poster}
+                    alt={film.title_zh}
+                    className="w-full h-full object-cover"
+                  />
+                  {/* 电影标题浮层 */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1">
+                    <p className="text-white text-[9px] font-medium leading-tight">{film.title_zh}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full aspect-[2/3] rounded-lg bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700/50 flex items-center justify-center">
+                  <span className="text-gray-600 text-[9px] text-center px-1 leading-tight">
                     {film.title_zh}
                   </span>
                 </div>
@@ -504,29 +494,26 @@ function ImagePlaceholder({
 
   if (image.layout === "grid4") {
     return (
-      <div className="w-full max-w-sm mx-auto grid grid-cols-2 gap-3 mb-4">
+      <div className="w-full max-w-[240px] md:max-w-[320px] mx-auto grid grid-cols-2 gap-2 mb-3">
         {image.tmdb?.map((film, i) => {
           const poster = posters[film.title_zh];
           return (
-            <div
-              key={i}
-              className=""
-            >
+            <div key={i}>
               {poster ? (
-                <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden border border-gray-700/50 shadow-md">
+                <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden border border-gray-700/50 shadow-sm">
                   <img
                     src={poster}
                     alt={film.title_zh}
                     className="w-full h-full object-cover"
                   />
                   {/* 电影标题浮层 */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5">
-                    <p className="text-white text-[10px] font-medium leading-tight">{film.title_zh}</p>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1">
+                    <p className="text-white text-[9px] font-medium leading-tight">{film.title_zh}</p>
                   </div>
                 </div>
               ) : (
                 <div className="w-full aspect-[2/3] rounded-lg bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700/50 flex items-center justify-center">
-                  <span className="text-gray-600 text-[10px] text-center px-1 leading-tight">
+                  <span className="text-gray-600 text-[9px] text-center px-1 leading-tight">
                     {film.title_zh}
                   </span>
                 </div>
@@ -541,12 +528,12 @@ function ImagePlaceholder({
   // Fallback for ai_placeholder with split layout
   if (image.layout === "split" && image.aiPrompts) {
     return (
-      <div className="w-full max-w-sm flex gap-2 mb-2">
-        <div className="flex-1 h-36 rounded-xl bg-gradient-to-br from-blue-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
-          <span className="text-gray-600 text-xs">AI 配图 (左)</span>
+      <div className="w-full max-w-[280px] md:max-w-[360px] mx-auto flex gap-2 mb-3">
+        <div className="flex-1 h-24 md:h-32 rounded-lg bg-gradient-to-br from-blue-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
+          <span className="text-gray-600 text-[10px]">AI 配图 (左)</span>
         </div>
-        <div className="flex-1 h-36 rounded-xl bg-gradient-to-br from-amber-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
-          <span className="text-gray-600 text-xs">AI 配图 (右)</span>
+        <div className="flex-1 h-24 md:h-32 rounded-lg bg-gradient-to-br from-amber-900/20 to-gray-900/20 border border-gray-700/50 flex items-center justify-center">
+          <span className="text-gray-600 text-[10px]">AI 配图 (右)</span>
         </div>
       </div>
     );
@@ -555,7 +542,7 @@ function ImagePlaceholder({
   // Single AI placeholder
   return (
     <div
-      className={`w-full max-w-sm h-40 rounded-xl bg-gradient-to-br ${gradients.single} border border-gray-700/50 flex items-center justify-center mb-2`}
+      className={`w-full max-w-[140px] md:max-w-[180px] h-28 md:h-36 rounded-lg bg-gradient-to-br ${gradients.single} border border-gray-700/50 flex items-center justify-center mb-3 mx-auto`}
     >
       <span className="text-gray-600 text-xs">配图占位</span>
     </div>

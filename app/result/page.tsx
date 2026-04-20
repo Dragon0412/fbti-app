@@ -68,6 +68,8 @@ export default function ResultPage() {
   const [result, setResult] = useState<Result | null>(null);
   const [loadingMessage, setLoadingMessage] = useState(0);
   const [showContent, setShowContent] = useState(false);
+  const [showTicket, setShowTicket] = useState(true); // 显示票根遮罩
+  const [isTearing, setIsTearing] = useState(false); // 撕票动画中
   const [generating, setGenerating] = useState(false);
   const [showCard, setShowCard] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
@@ -88,8 +90,8 @@ export default function ResultPage() {
       width: 120,
       margin: 1,
       color: {
-        dark: "#d4a853", // 琥珀色
-        light: "#0a0e1a", // 深色背景
+        dark: "#1e3a8a", // 深蓝色
+        light: "#ffffff", // 白色背景
       },
     })
       .then((url) => {
@@ -183,8 +185,162 @@ export default function ResultPage() {
   const hasHighRarity = highRarityAttrs.length > 0;
 
   return (
-    <main className="min-h-screen py-12 px-6">
-      <div className="max-w-lg mx-auto">
+    <main className="min-h-screen bg-[#050810] relative overflow-hidden">
+      {/* 影院射光效果 */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[800px] bg-gradient-to-b from-amber-500/5 via-amber-500/2 to-transparent blur-3xl"></div>
+        <div className="absolute top-20 left-1/4 w-[400px] h-[600px] bg-gradient-to-br from-blue-500/3 to-transparent blur-3xl"></div>
+        <div className="absolute top-20 right-1/4 w-[400px] h-[600px] bg-gradient-to-bl from-purple-500/3 to-transparent blur-3xl"></div>
+      </div>
+
+      {/* 票根遮罩层 */}
+      {showTicket && (
+        <div className="fixed inset-0 z-[100] bg-[#0a0e1a] flex items-center justify-center px-4">
+          <div className="max-w-2xl w-full">
+            {/* 票根容器 */}
+            <div className="relative">
+              {/* 票根主体 */}
+              <div
+                className={`relative bg-[#1a1f35] rounded-lg overflow-hidden transition-all duration-300 ${
+                  isTearing ? "animate-ticket-tear" : ""
+                }`}
+                style={{
+                  boxShadow: "0 10px 40px rgba(0, 0, 0, 0.5)",
+                }}
+              >
+                {/* 票根顶部锯齿 - 三角形 */}
+                <div className="flex justify-around px-4 pt-3">
+                  {[...Array(10)].map((_, i) => (
+                    <div key={i} className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-[#0a0e1a]"></div>
+                  ))}
+                </div>
+
+                {/* 票根内容 */}
+                <div className="p-8">
+                  {/* 电影名称 */}
+                  <div className="text-center mb-6">
+                    <p className="text-xs text-amber-400/60 tracking-[0.3em] uppercase mb-2">
+                      Film Buff Type Indicator
+                    </p>
+                    <h2 className="font-playfair text-5xl font-bold text-white mb-2">
+                      FBTI
+                    </h2>
+                    <p className="text-lg text-gray-300">影迷类型指标</p>
+                  </div>
+
+                  {/* 分割线 */}
+                  <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-dashed border-gray-600"></div>
+                    </div>
+                    <div className="relative flex justify-center">
+                      <span className="bg-[#1a1f35] px-4 text-xs text-gray-500">
+                        perforation line
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 结果展示区域 */}
+                  <div className="text-center">
+                    {!isTearing ? (
+                      <div className="space-y-6">
+                        <div>
+                          <p className="text-gray-400 mb-4">
+                            你的电影人格已经生成
+                          </p>
+                          <div className="font-playfair text-6xl font-bold text-amber-400 mb-2">
+                            {result.type}
+                          </div>
+                          <p className="text-xl text-white mb-1">
+                            {typeData?.name || "加载中..."}
+                          </p>
+                          {typeData?.tagline && (
+                            <p className="text-sm text-gray-400 italic">
+                              "{typeData.tagline}"
+                            </p>
+                          )}
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            setIsTearing(true);
+                            setTimeout(() => {
+                              setShowTicket(false);
+                            }, 1500);
+                          }}
+                          className="px-8 py-3 bg-amber-500 text-gray-900 font-semibold rounded-lg
+                                     hover:bg-amber-400 hover:scale-105 transition-all duration-300
+                                     animate-fade-in"
+                        >
+                          撕开票根，查看完整结果
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="py-8">
+                        <div className="tear-line"></div>
+                        <p className="text-gray-400 mt-4 animate-fade-in">
+                          正在揭晓你的电影人格...
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 票根底部锯齿 - 三角形 */}
+                <div className="flex justify-around px-4 pb-3">
+                  {[...Array(10)].map((_, i) => (
+                    <div key={i} className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-[#0a0e1a]"></div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 撕裂效果覆盖层 */}
+              {isTearing && (
+                <div className="absolute inset-0 pointer-events-none">
+                  {/* 撕裂线动画 */}
+                  <div className="tear-line"></div>
+                  
+                  {/* 纸屑粒子 */}
+                  <div className="paper-particle particle-1"></div>
+                  <div className="paper-particle particle-2"></div>
+                  <div className="paper-particle particle-3"></div>
+                  <div className="paper-particle particle-4"></div>
+                  <div className="paper-particle particle-5"></div>
+                </div>
+              )}
+            </div>
+
+            {/* 底部提示 */}
+            {!isTearing && (
+              <p className="text-center text-sm text-gray-500 mt-6 animate-fade-in">
+                ✨ 撕开票根，发现你的专属电影人格
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 影院氛围背景 */}
+      <div className="relative min-h-screen bg-[#050810] overflow-hidden">
+        {/* 射光效果 */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[800px] bg-gradient-to-b from-amber-500/5 via-amber-500/2 to-transparent blur-3xl"></div>
+          <div className="absolute top-20 left-1/4 w-[400px] h-[600px] bg-gradient-to-br from-blue-500/3 to-transparent blur-3xl"></div>
+          <div className="absolute top-20 right-1/4 w-[400px] h-[600px] bg-gradient-to-bl from-purple-500/3 to-transparent blur-3xl"></div>
+        </div>
+
+        {/* 票根长条背景 */}
+        <div className="relative z-10 py-12 px-4">
+          <div className="max-w-lg mx-auto bg-[#0a0e1a] rounded-lg overflow-hidden shadow-2xl">
+            {/* 顶部锯齿 */}
+            <div className="flex justify-around px-4 pt-3">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-[#1a1f35]"></div>
+              ))}
+            </div>
+
+            {/* 内容区 */}
+            <div className="px-6 py-8">
         {/* 二维码 - 右上角 */}
         {qrCodeUrl && (
           <div className="fixed top-4 right-4 z-50">
@@ -500,6 +656,16 @@ export default function ResultPage() {
         <p className="text-center text-xs text-gray-600 mt-12">
           FBTI &mdash; Film Buff Type Indicator
         </p>
+            </div>
+
+            {/* 底部锯齿 */}
+            <div className="flex justify-around px-4 pb-3">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-[#1a1f35]"></div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Share Card — rendered off-screen for html2canvas */}
@@ -545,6 +711,167 @@ export default function ResultPage() {
           </div>
         </div>
       )}
+
+      {/* 撕票动画样式 */}
+      <style>{`
+        @keyframes ticket-tear {
+          0% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: translateY(-20px) scale(1.02);
+            opacity: 0.8;
+          }
+          100% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+          }
+        }
+
+        @keyframes tear-line {
+          0% {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+        }
+
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes particle-fly {
+          0% {
+            transform: translate(0, 0) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(var(--tx), var(--ty)) rotate(var(--rotate));
+            opacity: 0;
+          }
+        }
+
+        .animate-ticket-tear {
+          animation: ticket-tear 1.5s ease-in-out;
+        }
+
+        .animate-fade-in {
+          animation: fade-in 0.5s ease-out;
+        }
+
+        .tear-line {
+          position: absolute;
+          top: 50%;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            #d4a853,
+            #fbbf24,
+            #d4a853,
+            transparent
+          );
+          box-shadow: 0 0 10px #d4a853;
+          animation: tear-line 1.5s ease-in-out;
+        }
+
+        .paper-particle {
+          position: absolute;
+          width: 8px;
+          height: 8px;
+          background: #d4a853;
+          opacity: 0;
+        }
+
+        .particle-1 {
+          top: 50%;
+          left: 20%;
+          --tx: -50px;
+          --ty: -80px;
+          --rotate: 180deg;
+          animation: particle-fly 1.5s ease-out 0.2s;
+        }
+
+        .particle-2 {
+          top: 50%;
+          left: 50%;
+          --tx: 30px;
+          --ty: -100px;
+          --rotate: 270deg;
+          animation: particle-fly 1.5s ease-out 0.3s;
+        }
+
+        .particle-3 {
+          top: 50%;
+          left: 80%;
+          --tx: 60px;
+          --ty: -70px;
+          --rotate: 90deg;
+          animation: particle-fly 1.5s ease-out 0.4s;
+        }
+
+        .particle-4 {
+          top: 50%;
+          left: 35%;
+          --tx: -40px;
+          --ty: -120px;
+          --rotate: 45deg;
+          animation: particle-fly 1.5s ease-out 0.5s;
+        }
+
+        .particle-5 {
+          top: 50%;
+          left: 65%;
+          --tx: 50px;
+          --ty: -90px;
+          --rotate: 315deg;
+          animation: particle-fly 1.5s ease-out 0.6s;
+        }
+
+        /* 专属印记图标样式 */
+        .attr-alpha-icon {
+          background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #c44569 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          filter: drop-shadow(0 0 8px rgba(255, 107, 107, 0.4));
+        }
+
+        .attr-beta-icon {
+          background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 50%, #7c3aed 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          filter: drop-shadow(0 0 8px rgba(196, 181, 253, 0.4));
+        }
+
+        .attr-gamma-icon {
+          background: linear-gradient(135deg, #6ee7b7 0%, #34d399 50%, #059669 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          filter: drop-shadow(0 0 8px rgba(110, 231, 183, 0.4));
+        }
+      `}</style>
     </main>
   );
 }
@@ -605,8 +932,17 @@ function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typ
   return (
     <div
       id="share-card-capture"
-      style={{ width: 420, background: "#0a0e1a", padding: "40px 32px 32px", fontFamily: "'Noto Serif SC', 'Playfair Display', serif", color: "#d1d5db" }}
+      style={{ width: 420, background: "#0a0e1a", padding: "0", fontFamily: "'Noto Serif SC', 'Playfair Display', serif", color: "#d1d5db" }}
     >
+      {/* 顶部锯齿 - 三角形 */}
+      <div style={{ height: 12, background: "#0a0e1a", display: "flex", justifyContent: "space-around", padding: "0 16px" }}>
+        {[...Array(10)].map((_, i) => (
+          <div key={i} style={{ width: 0, height: 0, borderLeft: "6px solid transparent", borderRight: "6px solid transparent", borderTop: "8px solid #1e243d" }}></div>
+        ))}
+      </div>
+
+      {/* 内容区域 */}
+      <div style={{ padding: "32px 28px 16px 28px" }}>
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 24 }}>
         <div style={{ color: amberDim, fontSize: 13, letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 8 }}>
@@ -745,35 +1081,61 @@ function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typ
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
           {[
-            { icon: "α", name: "时间穿越者", rarity: result.hidden.alpha.rarity, label: result.hidden.alpha.label, gradient: "linear-gradient(135deg, #f9fafb 0%, #d1d5db 50%, #9ca3af 100%)" },
-            { icon: "β", name: "形式感应器", rarity: result.hidden.beta.rarity, label: result.hidden.beta.label, gradient: "linear-gradient(135deg, #c4b5fd 0%, #a78bfa 50%, #7c3aed 100%)" },
-            { icon: "γ", name: "文化通行证", rarity: result.hidden.gamma.rarity, label: result.hidden.gamma.label, gradient: "linear-gradient(135deg, #6ee7b7 0%, #34d399 50%, #059669 100%)" },
+            { icon: "α", name: "时间穿越者", rarity: result.hidden.alpha.rarity, label: result.hidden.alpha.label },
+            { icon: "β", name: "形式感应器", rarity: result.hidden.beta.rarity, label: result.hidden.beta.label },
+            { icon: "γ", name: "文化通行证", rarity: result.hidden.gamma.rarity, label: result.hidden.gamma.label },
           ].map((attr) => {
-            const colors = hiddenAttrRarityColors[attr.rarity] ?? hiddenAttrRarityColors.common;
+            // 纯色，确保html2canvas正确渲染（渐变文字不被支持）
+            const iconColor = attr.icon === 'α'
+              ? '#ee5a6f'
+              : attr.icon === 'β'
+              ? '#a78bfa'
+              : '#34d399';
+            const iconShadow = attr.icon === 'α'
+              ? 'drop-shadow(0 0 8px rgba(255, 107, 107, 0.5))'
+              : attr.icon === 'β'
+              ? 'drop-shadow(0 0 8px rgba(196, 181, 253, 0.5))'
+              : 'drop-shadow(0 0 8px rgba(110, 231, 183, 0.5))';
+            const rarityColor = hiddenAttrRarityColors[attr.rarity] ?? hiddenAttrRarityColors.common;
+            
             return (
-              <div key={attr.icon} style={{ backgroundColor: "#222845", borderRadius: 12, padding: "12px 8px", border: "1px solid rgba(107,114,128,0.2)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", height: "100%" }}>
+              <div key={attr.icon} style={{ backgroundColor: "#222845", borderRadius: 16, padding: "12px", border: "1px solid #1f2937", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", height: "100%" }}>
                 {/* 图标 - 顶部 */}
                 <div style={{ 
-                  fontSize: 28, 
-                  fontWeight: 700, 
-                  background: attr.gradient,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  filter: "drop-shadow(0 0 8px rgba(255,255,255,0.3))",
+                  fontSize: 30, 
+                  fontWeight: 400,
                   minHeight: "48px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   width: "100%",
                   padding: "8px 0"
-                }}>{attr.icon}</div>
+                }}>
+                  <span style={{ 
+                    fontSize: 'inherit', 
+                    fontWeight: 'inherit',
+                    color: iconColor,
+                    filter: iconShadow
+                  }}>{attr.icon}</span>
+                </div>
                 
                 {/* 名称 - 中间 */}
-                <div style={{ fontSize: 11, color: gray300, textAlign: "center", lineHeight: "1.3", margin: "4px 0" }}>{attr.name}</div>
+                <div style={{ fontSize: 12, color: gray300, textAlign: "center", lineHeight: "1.25", margin: "4px 0" }}>{attr.name}</div>
                 
-                {/* 标签 - 底部 */}
-                <span style={{ display: "inline-block", padding: "4px 10px", borderRadius: 9999, fontSize: 12, lineHeight: "normal", backgroundColor: colors.bg, color: colors.text, fontWeight: 500 }}>
+                {/* 标签 - 底部胶囊色块 */}
+                <span style={{ 
+                  display: "inline-block",
+                  padding: "0 10px",
+                  borderRadius: 9999,
+                  fontSize: 12,
+                  lineHeight: "22px",
+                  height: 22,
+                  fontWeight: 500,
+                  textAlign: "center" as const,
+                  backgroundColor: rarityColor.bg,
+                  color: rarityColor.text,
+                  whiteSpace: "nowrap" as const
+                }}>
                   {attr.label}
                 </span>
               </div>
@@ -828,29 +1190,18 @@ function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typ
                 <g key={i}>
                   {/* 点 - 琥珀色 */}
                   <circle cx={dotX} cy={dotY} r="4" fill="#d4a853" />
-                  {/* 文字 - 直接使用内联样式,确保html2canvas能捕获 */}
+                  {/* 标签 - 单行，使用基因对应颜色 */}
                   <text
                     x={labelX}
-                    y={labelY - 5}
+                    y={labelY}
                     textAnchor={anchor}
                     dominantBaseline="central"
                     fill={g.color}
-                    fontSize="16"
+                    fontSize="15"
                     fontFamily="'Noto Serif SC', serif"
                     fontWeight="600"
                   >
                     {g.label}
-                  </text>
-                  <text
-                    x={labelX}
-                    y={labelY + 12}
-                    textAnchor={anchor}
-                    dominantBaseline="central"
-                    fill="rgba(212, 168, 83, 0.75)"
-                    fontSize="14"
-                    fontFamily="'Noto Sans SC', sans-serif"
-                  >
-                    {g.reveal} ({delta[g.key] ?? 0})
                   </text>
                 </g>
               );
@@ -893,8 +1244,8 @@ function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typ
       )}
 
       {/* Footer */}
-      <div style={{ textAlign: "center", paddingTop: 16, borderTop: "1px solid #1f2937" }}>
-        <div style={{ fontSize: 13, color: "#6b7280", marginBottom: 12 }}>FBTI &mdash; Film Buff Type Indicator</div>
+      <div style={{ textAlign: "center", paddingTop: 24, paddingBottom: 24, borderTop: "1px solid #1f2937" }}>
+        <div style={{ fontSize: 13, color: "#6b7280", marginBottom: 16 }}>FBTI &mdash; Film Buff Type Indicator</div>
         {/* 二维码 */}
         {qrCodeUrl && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
@@ -903,6 +1254,14 @@ function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typ
           </div>
         )}
       </div>
+
+      {/* 底部锯齿 - 三角形 */}
+      <div style={{ height: 12, background: "#0a0e1a", display: "flex", justifyContent: "space-around", padding: "0 16px" }}>
+        {[...Array(10)].map((_, i) => (
+          <div key={i} style={{ width: 0, height: 0, borderLeft: "6px solid transparent", borderRight: "6px solid transparent", borderBottom: "8px solid #1e243d" }}></div>
+        ))}
+      </div>
+    </div>
     </div>
   );
 }
@@ -933,7 +1292,7 @@ function HiddenAttrCard({
       {/* 名称 - 中间 */}
       <p className="text-xs text-gray-300 text-center leading-tight my-1">{name}</p>
       
-      {/* 标签 - 底部 */}
+      {/* 标签 - 底部胶囊色块 */}
       <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${colorClass}`}>
         {label}
       </span>
@@ -1019,12 +1378,20 @@ function DeltaRadarChart({ delta }: { delta: Record<string, number> }) {
               <circle cx={dotX} cy={dotY} r={isHovered ? 7 : 5} fill="#d4a853" style={{ transition: "r 0.15s ease" }} />
               {isHovered && <circle cx={dotX} cy={dotY} r="12" fill="none" stroke="#d4a853" strokeWidth="1.5" opacity={0.6} />}
               {isHovered && <circle cx={dotX} cy={dotY} r="15" fill="#d4a853" opacity={0.2} />}
-              {/* 文字 - 使用对应基因颜色和CSS类 */}
-              <foreignObject x={labelX - 40} y={labelY - 15} width="80" height="30">
-                <div xmlns="http://www.w3.org/1999/xhtml" className={`gene-label gene-${g.key}`} style={{ textAlign: "center", padding: "4px 8px", fontSize: "15px", fontWeight: isHovered ? "700" : "400" }}>
-                  {g.label}
-                </div>
-              </foreignObject>
+              {/* 文字 - 使用对应基因颜色 */}
+              <text
+                x={labelX}
+                y={labelY}
+                textAnchor={anchor}
+                dominantBaseline="central"
+                fill={g.color}
+                fontSize={isHovered ? "17" : "15"}
+                fontFamily="'Noto Serif SC', serif"
+                fontWeight={isHovered ? "700" : "400"}
+                style={{ transition: "font-size 0.15s ease" }}
+              >
+                {g.label}
+              </text>
             </g>
           );
         })}

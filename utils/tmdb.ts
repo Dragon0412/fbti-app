@@ -1,3 +1,5 @@
+import { POSTER_MAP } from '@/data/posterMap';
+
 const TMDB_API_KEY = "05b5d0763ad31ee3e57d8afc18b25a48";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 
@@ -90,17 +92,22 @@ export function getBackdropUrl(path: string | null, size: string = "w1280"): str
 }
 
 export async function fetchMoviePosters(movies: { title: string; year: number }[]): Promise<Record<string, string | null>> {
-  const results: Record<string, string | null> = {};
-
-  for (const movie of movies) {
+  const promises = movies.map(async (movie) => {
     const enTitle = movieTitleMap[movie.title] || movie.title;
     const tmdbMovie = await searchMovie(enTitle, movie.year);
     if (tmdbMovie) {
-      results[movie.title] = getPosterUrl(tmdbMovie.poster_path);
-    } else {
-      // Try without year
-      const fallback = await searchMovie(enTitle);
-      results[movie.title] = fallback ? getPosterUrl(fallback.poster_path) : null;
+      return { title: movie.title, url: getPosterUrl(tmdbMovie.poster_path) };
+    }
+    // Try without year
+    const fallback = await searchMovie(enTitle);
+    return { title: movie.title, url: fallback ? getPosterUrl(fallback.poster_path) : null };
+  });
+
+  const settled = await Promise.allSettled(promises);
+  const results: Record<string, string | null> = {};
+  for (const result of settled) {
+    if (result.status === 'fulfilled') {
+      results[result.value.title] = result.value.url;
     }
   }
 
@@ -109,43 +116,6 @@ export async function fetchMoviePosters(movies: { title: string; year: number }[
 
 // Pre-fetch all poster URLs for the movies in questions
 export async function initMoviePosters() {
-  const movies = [
-    { title: "星际穿越", year: 2014 },
-    { title: "坠落的审判", year: 2023 },
-    { title: "一次别离", year: 2011 },
-    { title: "霸王别姬", year: 1993 },
-    { title: "活着", year: 1994 },
-    { title: "大话西游之大圣娶亲", year: 1995 },
-    { title: "让子弹飞", year: 2010 },
-    { title: "真爱至上", year: 2003 },
-    { title: "小鬼当家", year: 1990 },
-    { title: "天书奇谭", year: 1983 },
-    { title: "月球", year: 2009 },
-    { title: "沙丘", year: 2021 },
-    { title: "小丑", year: 2019 },
-    { title: "无间道", year: 2002 },
-    { title: "心灵奇旅", year: 2020 },
-    { title: "蜘蛛侠：平行宇宙", year: 2018 },
-    { title: "春光乍泄", year: 1997 },
-    { title: "月光男孩", year: 2016 },
-    { title: "米尔克", year: 2008 },
-    { title: "逃出绝命镇", year: 2017 },
-    { title: "别告诉她", year: 2019 },
-    { title: "黑豹", year: 2018 },
-    { title: "阿甘正传", year: 1994 },
-    { title: "出租车司机", year: 1976 },
-    { title: "小偷家族", year: 2018 },
-    { title: "寄生虫", year: 2019 },
-    { title: "龙猫", year: 1988 },
-    { title: "佛罗里达乐园", year: 2017 },
-    { title: "火星救援", year: 2015 },
-    { title: "银翼杀手", year: 1982 },
-    { title: "星球大战", year: 1977 },
-    { title: "色，戒", year: 2007 },
-    { title: "发条橙", year: 1971 },
-    { title: "颐和园", year: 2006 },
-    { title: "索多玛120天", year: 1975 },
-  ];
-
-  return fetchMoviePosters(movies);
+  // 直接返回本地静态映射，无需网络请求
+  return POSTER_MAP;
 }

@@ -128,50 +128,54 @@ body {
   100% { transform: translateY(0); filter: drop-shadow(0 0 12px rgba(220, 38, 38, 0.9)); }
 }
 
-/* 织梦 - 动画 - 粉紫色 - 辉光脉动 */
-.gene-animation {
-  --gene-color: #f472b6;
-  --gene-glow: rgba(244, 114, 182, 0.6);
-  color: #f472b6;
+/* 情澜 - 爱情/言情 - 粉红色 - 心跳脉动 */
+.gene-romance {
+  --gene-color: #ff6b9d;
+  --gene-glow: rgba(255, 107, 157, 0.6);
+  color: #ff6b9d;
 }
 
-.gene-animation:hover {
-  animation: glow-pulse 1.5s ease-in-out infinite;
-  filter: drop-shadow(0 0 15px rgba(244, 114, 182, 0.8));
+.gene-romance:hover {
+  animation: heartbeat 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 15px rgba(255, 107, 157, 0.8));
 }
 
-@keyframes glow-pulse {
+@keyframes heartbeat {
   0%, 100% { 
-    filter: drop-shadow(0 0 10px rgba(244, 114, 182, 0.6));
+    filter: drop-shadow(0 0 10px rgba(255, 107, 157, 0.6));
     transform: scale(1);
   }
-  50% { 
-    filter: drop-shadow(0 0 20px rgba(244, 114, 182, 1));
-    transform: scale(1.08);
+  25% { 
+    transform: scale(1.12);
+  }
+  40% { 
+    transform: scale(1.02);
+  }
+  60% { 
+    filter: drop-shadow(0 0 20px rgba(255, 107, 157, 1));
+    transform: scale(1.1);
   }
 }
 
-/* 拾真 - 纪录片 - 翠绿色 - 呼吸发光 */
-.gene-documentary {
-  --gene-color: #10b981;
-  --gene-glow: rgba(16, 185, 129, 0.6);
-  color: #10b981;
+/* 烈风 - 动作/冒险 - 橘红色 - 震荡冲击 */
+.gene-action {
+  --gene-color: #ff4500;
+  --gene-glow: rgba(255, 69, 0, 0.6);
+  color: #ff4500;
 }
 
-.gene-documentary:hover {
-  animation: breathe-glow 2s ease-in-out infinite;
-  filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.8));
+.gene-action:hover {
+  animation: shockwave 0.6s ease-out;
+  filter: drop-shadow(0 0 12px rgba(255, 69, 0, 0.8));
 }
 
-@keyframes breathe-glow {
-  0%, 100% { 
-    filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5));
-    transform: scale(1);
-  }
-  50% { 
-    filter: drop-shadow(0 0 18px rgba(16, 185, 129, 0.9));
-    transform: scale(1.05);
-  }
+@keyframes shockwave {
+  0% { transform: translateX(0) scale(1); filter: drop-shadow(0 0 5px rgba(255, 69, 0, 0.5)); }
+  20% { transform: translateX(-3px) scale(1.05); }
+  40% { transform: translateX(3px) scale(1.08); filter: drop-shadow(0 0 18px rgba(255, 69, 0, 1)); }
+  60% { transform: translateX(-2px) scale(1.04); }
+  80% { transform: translateX(1px); }
+  100% { transform: translateX(0) scale(1); filter: drop-shadow(0 0 12px rgba(255, 69, 0, 0.9)); }
 }
 
 /* 通用基因标签样式 */
@@ -210,12 +214,12 @@ body {
     animation: mobile-glow 3s ease-in-out infinite, bleed 3s ease-in-out infinite;
   }
   
-  .gene-animation {
-    animation: mobile-glow 3s ease-in-out infinite, glow-pulse 2s ease-in-out infinite;
+  .gene-romance {
+    animation: mobile-glow 3s ease-in-out infinite, heartbeat 2s ease-in-out infinite;
   }
   
-  .gene-documentary {
-    animation: mobile-glow 3s ease-in-out infinite, breathe-glow 2.5s ease-in-out infinite;
+  .gene-action {
+    animation: mobile-glow 3s ease-in-out infinite, shockwave 2.5s ease-out infinite;
   }
 }
 

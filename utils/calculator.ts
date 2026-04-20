@@ -455,11 +455,33 @@ export function calculateResult(answers: AnswerEntry[]): Result {
       }
     });
 
-    // Profile tags from Q51-Q53, Q50
-    if (q.profileTags && optionIndices.length === 1) {
-      profileTags[q.id] = q.profileTags[optionIndices[0]];
+    // Profile tags from Q50-Q53
+    if (q.profileTags && optionIndices.length > 0) {
+      if ([50, 51, 52, 53].includes(q.id)) {
+        // 画像题：多选时取第一个实质选项的标签
+        const firstSubstantive = optionIndices.find(
+          (i) => q.options[i]?.type === "substantive"
+        );
+        if (firstSubstantive !== undefined) {
+          profileTags[q.id] = q.profileTags[firstSubstantive];
+        }
+      } else if (optionIndices.length === 1) {
+        // 非画像题保持原逻辑
+        profileTags[q.id] = q.profileTags[optionIndices[0]];
+      }
     }
   });
+
+  // 精简版权重补偿：答题数 <= 25 视为精简版
+  const isQuickMode = answers.length <= 25;
+  if (isQuickMode) {
+    hidden.alpha = Math.round(hidden.alpha * 1.1);
+    hidden.beta = Math.round(hidden.beta * 1.2);
+    hidden.gamma = Math.round(hidden.gamma * 1.5);
+    (Object.keys(hidden.delta) as (keyof typeof hidden.delta)[]).forEach((k) => {
+      hidden.delta[k] = Math.round(hidden.delta[k] * 1.3);
+    });
+  }
 
   // Clamp hidden attributes to 0
   hidden.alpha = Math.max(0, hidden.alpha);

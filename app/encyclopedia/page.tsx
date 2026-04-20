@@ -227,7 +227,7 @@ export default function EncyclopediaPage() {
                         <div>
                           <p className="text-xs text-gray-500 mb-2">代表导演</p>
                           <div className="flex flex-wrap gap-1.5">
-                            {type.directors.slice(0, 4).map((d) => (
+                            {type.directors.slice(0, 6).map((d) => (
                               <span
                                 key={d}
                                 className="px-2 py-0.5 bg-[#0a0e1a] rounded text-xs text-gray-400"
@@ -240,7 +240,7 @@ export default function EncyclopediaPage() {
                         <div>
                           <p className="text-xs text-gray-500 mb-2">代表作品</p>
                           <div className="flex flex-wrap gap-1.5">
-                            {type.films.slice(0, 4).map((f) => (
+                            {type.films.slice(0, 6).map((f) => (
                               <span
                                 key={f}
                                 className="px-2 py-0.5 bg-[#0a0e1a] rounded text-xs text-gray-400"

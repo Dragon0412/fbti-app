@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# logs & runtime
+nohup.out
+server.log
+
+# qoder
+.qoder/

@@ -42,8 +42,8 @@ export interface Result {
 
 const RARITY_LABELS: Record<string, Record<string, string>> = {
   alpha: {
-    common: "当代观众",
-    uncommon: "跨代观众",
+    common: "影院漫步者",
+    uncommon: "十年藏家",
     rare: "影史漫游者",
     legendary: "时间旅人",
   },
@@ -51,10 +51,10 @@ const RARITY_LABELS: Record<string, Record<string, string>> = {
     common: "故事优先",
     uncommon: "氛围捕手",
     rare: "感官猎人",
-    legendary: "通感者",
+    legendary: "影像魔法师",
   },
   gamma: {
-    common: "主流观众",
+    common: "本土影迷",
     uncommon: "邻国通",
     rare: "世界公民",
     legendary: "无国界影人",
@@ -63,9 +63,9 @@ const RARITY_LABELS: Record<string, Record<string, string>> = {
 
 function getRarity(attr: string, score: number): string {
   const thresholds: Record<string, number[]> = {
-    alpha: [2, 5, 8],
+    alpha: [2, 4, 6],
     beta: [3, 7, 12],
-    gamma: [1, 3, 5],
+    gamma: [2, 4, 6],
   };
   const t = thresholds[attr];
   if (!t) return "common";
@@ -80,40 +80,115 @@ interface AnswerEntry {
   optionIndices: number[];
 }
 
-// Profile description phrases
-const hallPhrases: Record<string, string> = {
-  "巨幕信徒": "你追求的是视觉的极致震撼",
-  "声控画质党": "你对声画品质有着近乎偏执的要求",
-  "性价比玩家": "你懂得在体验和预算之间找到最佳平衡",
-  "内容至上": "对你来说，放什么比在哪放更重要",
-  "随缘派": "你不挑场地，电影本身才是主角",
-  "居家党": "你的私人影院就是最舒适的沙发",
-  "未选择": "",
+// === Fallback 编织模板 ===
+
+// 环境开场句
+const envOpeners: Record<string, string[]> = {
+  "影院原教旨主义者": [
+    "对你来说，电影就应该在黑暗的影厅里看——",
+    "大银幕亮起的那一刻，仪式感就位了——",
+  ],
+  "沙发哲学家": [
+    "你的理想观影姿势是瘫在沙发上，手边一杯热饮——",
+    "窝在家里关上门，才是你进入电影世界的方式——",
+  ],
+  "场景切换大师": [
+    "影院、卧室、通勤地铁……你的屏幕无处不在——",
+    "你会为每部电影挑一个最对味的观影场景——",
+  ],
+  "随遇而安": [
+    "有什么设备就用什么设备，你从不挑剔——",
+    "在哪看不重要，重要的是看什么——",
+  ],
 };
 
-const envPhrases: Record<string, string> = {
-  "影院原教旨主义者": "大银幕的仪式感是你的信仰",
-  "沙发哲学家": "窝在家里才能真正沉入电影的世界",
-  "场景切换大师": "你会为每部电影挑选最合适的观影场景",
-  "随遇而安": "哪里都能看，重要的是看什么",
-  "未选择": "",
+// 影厅+社交桥接句
+const hallSocialBridges: Record<string, Record<string, string[]>> = {
+  "巨幕信徒": {
+    "独行侠": ["你独自坐在IMAX最佳观影位，这就是你的冥想时间。"],
+    "散场话事人": ["巨幕看完，散场后和朋友热烈复盘，这才是完整体验。"],
+    "集体共振追求者": ["IMAX大厅里全场一起屏住呼吸那一刻，是你最爱的集体高潮。"],
+    "百搭观众": ["巨幕是必须的，至于和谁一起看，你都OK。"],
+  },
+  "声控画质党": {
+    "独行侠": ["杜比全景声配上一个人的专注，每个细节都不放过。"],
+    "散场话事人": ["声画细节全收，看完还得和人逐帧讨论。"],
+    "集体共振追求者": ["极致的声画体验加上满场的情绪共振，双重享受。"],
+    "百搭观众": ["画质和音效是底线，社交方式倒是随意。"],
+  },
+  "性价比玩家": {
+    "独行侠": ["花最少的钱，享受最安静的独处观影时光。"],
+    "散场话事人": ["花最少的钱，看完电影后和朋友聊最多的天。"],
+    "集体共振追求者": ["特价场加上满座的热闹氛围，性价比直接拉满。"],
+    "百搭观众": ["不多花冤枉钱，和谁看都开心。"],
+  },
+  "内容至上": {
+    "独行侠": ["你只在乎片子本身，一个人安静地看完就好。"],
+    "散场话事人": ["片子是入场券，散场后的讨论才是正餐。"],
+    "集体共振追求者": ["好内容配上全场共鸣，这种化学反应让你上瘾。"],
+    "百搭观众": ["内容为王，其他都是浮云。"],
+  },
+  "随缘派": {
+    "独行侠": ["不挑影厅，一个人说走就走，轻装上阵。"],
+    "散场话事人": ["随便找个厅坐下，看完拉人开聊才是重点。"],
+    "集体共振追求者": ["哪个厅无所谓，人多热闹就行。"],
+    "百搭观众": ["不挑场地不挑人，你和电影的关系就是这么松弛。"],
+  },
+  "居家党": {
+    "独行侠": ["深夜独自窝在被子里看完一部片，这种私密感无可替代。"],
+    "散场话事人": ["在家看完立刻找人线上开聊，弹幕和群聊就是你的散场。"],
+    "集体共振追求者": ["拉上朋友一起投屏，客厅秒变私人放映厅。"],
+    "百搭观众": ["沙发一躺，管它独享还是共赏，都舒服。"],
+  },
 };
 
-const socialPhrases: Record<string, string> = {
-  "独行侠": "你享受一个人与银幕之间的私密对话",
-  "散场话事人": "看完电影和人聊上半小时才算完整",
-  "集体共振追求者": "满座影厅里的集体情绪共振让你着迷",
-  "百搭观众": "独处或同行，你都能自在享受",
-  "未选择": "",
+// 风格收尾句
+const styleClosers: Record<string, string[]> = {
+  "首映场占座王": [
+    "新片上映第一天就要看到，这是原则。",
+    "至于什么时候看？当然是第一时间。",
+  ],
+  "随心所欲派": [
+    "今晚看什么？打开APP随便滑两下就行。",
+    "突然想看就看，你的浪漫从不需要计划。",
+  ],
+  "口碑鉴定师": [
+    "没有7分以上的评分？那就先放着吧。",
+    "至于选什么片？你信口碑，信自己的判断。",
+  ],
+  "线上原住民": [
+    "院线？那是什么？你的片源永远在线上。",
+    "流媒体才是你探索电影世界的主阵地。",
+  ],
 };
 
-const stylePhrases: Record<string, string> = {
-  "首映场占座王": "每一部期待的片子，你都要第一时间锁定",
-  "随心所欲派": "突然想看就走进影院，这是你的浪漫",
-  "口碑鉴定师": "你更愿意等口碑沉淀后再做选择",
-  "线上原住民": "流媒体是你探索电影世界的主阵地",
-  "未选择": "",
+// 单维度独立句（当只有单一维度时使用）
+const hallSolo: Record<string, string> = {
+  "巨幕信徒": "你追求的是视觉的极致震撼，巨幕才是看电影的正确打开方式。",
+  "声控画质党": "你对声画品质有着近乎偏执的要求，每一帧都值得被认真对待。",
+  "性价比玩家": "你懂得在体验和预算之间找到最佳平衡，聪明观影是一种态度。",
+  "内容至上": "对你来说，放什么比在哪放更重要，内容永远是第一位。",
+  "随缘派": "你不挑场地，电影本身才是主角。",
+  "居家党": "你的私人影院就是最舒适的沙发，宅家观影才是正义。",
 };
+
+const socialSolo: Record<string, string> = {
+  "独行侠": "你享受一个人与银幕之间的私密对话，独处是最高级的观影方式。",
+  "散场话事人": "看完电影和人聊上半小时才算完整，讨论是观影的延伸。",
+  "集体共振追求者": "满座影厅里的集体情绪共振让你着迷，一起看才有味道。",
+  "百搭观众": "独处或同行，你都能自在享受，你和电影的关系很松弛。",
+};
+
+/**
+ * Pick a random element from an array (deterministic by simple hash for consistency).
+ */
+function pickVariant(variants: string[], seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+  }
+  return variants[Math.abs(hash) % variants.length];
+}
 
 /**
  * Generate a natural, flowing profile description based on the four dimensions.
@@ -171,7 +246,7 @@ function generateProfileDescription(
     },
     {
       match: { hall: "内容至上", environment: "随遇而安" },
-      desc: "在哪看、怎么看都无所谓，重要的是看什么。你是最纯粹的内容主义者。",
+      desc: `你属于那种“手机充电器都不带但片单肯定有”的人。在哪看、怎么看都不重要，你只关心一件事：今晚看什么。`,
     },
     {
       match: { environment: "影院原教旨主义者", social: "独行侠" },
@@ -193,6 +268,24 @@ function generateProfileDescription(
       match: { social: "集体共振追求者", style: "首映场占座王" },
       desc: "首映夜就是你的主场——和一群同样期待的人一起，感受全场的第一次集体心跳。",
     },
+
+    // === 新增高频原型 ===
+    {
+      match: { hall: "居家党", social: "独行侠", style: "线上原住民" },
+      desc: `深夜一个人穿着睡衣打开投屏，算法推荐全部关掉，只看自己的收藏夹。你是流媒体时代最自在的独行影迷。`,
+    },
+    {
+      match: { hall: "巨幕信徒", social: "集体共振追求者", style: "首映场占座王" },
+      desc: `IMAX厅、首映场、满座——你把看电影当成了追星现场。火爆的氛围和极致的视听缺一不可，这才叫“看电影”。`,
+    },
+    {
+      match: { hall: "性价比玩家", style: "随心所欲派", social: "散场话事人" },
+      desc: `临时起意、挑个性价比厅、看完拉朋友聊一个小时——你的观影流程随意但有仪式感，散场后的聊天才是真正的彩蛋。`,
+    },
+    {
+      match: { environment: "沙发哲学家", social: "独行侠", style: "口碑鉴定师" },
+      desc: `等豆瓣评分稳定了再动手，一个人窝在家里慢慢看。你是观影派里的安全型选手，口碑是你的护身符，沙发是你的主场。`,
+    },
   ];
 
   // 尝试匹配画像原型
@@ -204,32 +297,57 @@ function generateProfileDescription(
     }
   }
 
-  // 未匹配到原型，回退到逐句拼接逻辑
-  // Collect all non-empty phrases
-  const phrases: string[] = [];
+  // 未匹配到原型，使用上下文感知的编织逻辑
+  const seed = `${hall}|${environment}|${social}|${style}`;
+  const hasEnv = environment !== "未选择";
+  const hasHall = hall !== "未选择";
+  const hasSocial = social !== "未选择";
+  const hasStyle = style !== "未选择";
 
-  const hallPhrase = hallPhrases[hall];
-  if (hallPhrase) phrases.push(hallPhrase);
+  const dimCount = [hasEnv, hasHall, hasSocial, hasStyle].filter(Boolean).length;
 
-  const envPhrase = envPhrases[environment];
-  if (envPhrase) phrases.push(envPhrase);
+  // 无任何维度
+  if (dimCount === 0) return "";
 
-  const socialPhrase = socialPhrases[social];
-  if (socialPhrase) phrases.push(socialPhrase);
+  // 只有一个维度，返回独立句
+  if (dimCount === 1) {
+    if (hasEnv) return pickVariant(envOpeners[environment] ?? [], seed).replace(/——$/, "这就是你。");
+    if (hasHall) return hallSolo[hall] ?? "";
+    if (hasSocial) return socialSolo[social] ?? "";
+    if (hasStyle) return pickVariant(styleClosers[style] ?? [], seed);
+    return "";
+  }
 
-  const stylePhrase = stylePhrases[style];
-  if (stylePhrase) phrases.push(stylePhrase);
+  // 多维度编织
+  const parts: string[] = [];
 
-  // If no phrases, return empty string (this shouldn't happen as caller checks)
-  if (phrases.length === 0) return "";
+  // 1. 环境开场
+  if (hasEnv) {
+    parts.push(pickVariant(envOpeners[environment] ?? [], seed));
+  }
 
-  // If only one phrase, return it directly
-  if (phrases.length === 1) return phrases[0] + "。";
+  // 2. 影厅+社交桥接
+  if (hasHall && hasSocial) {
+    const bridges = hallSocialBridges[hall]?.[social];
+    if (bridges) {
+      parts.push(pickVariant(bridges, seed));
+    } else {
+      // 无预定义桥接，分别添加
+      parts.push(hallSolo[hall] ?? "");
+      parts.push(socialSolo[social] ?? "");
+    }
+  } else if (hasHall) {
+    parts.push(hallSolo[hall] ?? "");
+  } else if (hasSocial) {
+    parts.push(socialSolo[social] ?? "");
+  }
 
-  // If 2 or more phrases, join with commas and add "而" before the last one
-  const allButLast = phrases.slice(0, -1);
-  const last = phrases[phrases.length - 1];
-  return allButLast.join("。") + "，而" + last + "。";
+  // 3. 风格收尾
+  if (hasStyle) {
+    parts.push(pickVariant(styleClosers[style] ?? [], seed));
+  }
+
+  return parts.filter(Boolean).join("");
 }
 
 export function calculateResult(answers: AnswerEntry[]): Result {
@@ -253,8 +371,8 @@ export function calculateResult(answers: AnswerEntry[]): Result {
       comedy: 0,
       scifi: 0,
       crime: 0,
-      animation: 0,
-      documentary: 0,
+      romance: 0,
+      action: 0,
     },
   };
 
@@ -497,7 +615,7 @@ function selectTopFilms(type: string, hiddenRaw: { alpha: number; beta: number; 
  * Uses the legendary threshold as the max reference point.
  */
 function normalizeScore(raw: number, attr: "alpha" | "beta" | "gamma"): number {
-  const maxThresholds: Record<string, number> = { alpha: 8, beta: 12, gamma: 5 };
+  const maxThresholds: Record<string, number> = { alpha: 6, beta: 12, gamma: 6 };
   const max = maxThresholds[attr] ?? 10;
   return Math.max(0, Math.min(1, raw / max));
 }

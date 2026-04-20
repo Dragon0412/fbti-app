@@ -1,6 +1,6 @@
 // 自动生成的海报映射文件
 // 由 scripts/download-posters.js 生成
-// 生成时间: 2026-04-20T04:40:09.801Z
+// 生成时间: 2026-04-20T11:51:19.664Z
 
 export const POSTER_MAP: Record<string, string> = {
   "星际穿越": "/posters/interstellar.jpg",
@@ -38,4 +38,13 @@ export const POSTER_MAP: Record<string, string> = {
   "发条橙": "/posters/a-clockwork-orange.jpg",
   "颐和园": "/posters/summer-palace.jpg",
   "索多玛120天": "/posters/sal-or-the-120-days-of-sodom.jpg",
+  "徒手攀岩": "/posters/free-solo.jpg",
+  "闪灵": "/posters/the-shining.jpg",
+  "摩登时代": "/posters/modern-times.jpg",
+  "信条": "/posters/tenet.jpg",
+  "荒野生存": "/posters/into-the-wild.jpg",
+  "疯狂的麦克斯：狂暴之路": "/posters/mad-max-fury-road.jpg",
+  "触不可及": "/posters/the-intouchables.jpg",
+  "龙虾": "/posters/the-lobster.jpg",
+  "V字仇杀队": "/posters/v-for-vendetta.jpg",
 };

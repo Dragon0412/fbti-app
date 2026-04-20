@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FBTI 题目优化审阅系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --success: #22c55e;
+            --warning: #eab308;
+            --danger: #ef4444;
+            --info: #06b6d4;
+            --border: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-thumbnails {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            max-width: 800px;
+        }
+
+        .nav-item {
+            width: 40px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .nav-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .nav-item.pending {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .nav-item.approved {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .nav-item.suggested {
+            background: rgba(234, 179, 8, 0.2);
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .nav-item.critical {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .nav-item.active {
+            box-shadow: 0 0 0 3px var(--accent-primary);
+        }
+
+        /* Main Content */
+        .main-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        /* Question Display */
+        .question-meta {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-dimension {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent-primary);
+        }
+
+        .badge-type {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--accent-secondary);
+        }
+
+        .badge-status {
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--info);
+        }
+
+        .question-text {
+            font-size: 1.125rem;
+            line-height: 1.7;
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option-item {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .option-label {
+            font-weight: 600;
+            color: var(--accent-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .option-text {
+            color: var(--text-primary);
+        }
+
+        .option-scores {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .option-scores span {
+            display: inline-block;
+            background: var(--bg-tertiary);
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            margin-right: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Suggestions Panel */
+        .suggestion-box {
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .suggestion-title {
+            color: var(--warning);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .suggestion-content {
+            color: var(--text-primary);
+        }
+
+        .suggestion-reason {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed var(--border);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .no-suggestion {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .no-suggestion-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Action Buttons */
+        .actions-panel {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .actions-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 0.9375rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: #1e293b;
+        }
+
+        .btn-warning:hover {
+            background: #ca8a04;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Notes */
+        .notes-section {
+            margin-top: 1rem;
+        }
+
+        .notes-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .notes-input {
+            width: 100%;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .notes-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-approved { color: var(--success); }
+        .stat-pending { color: var(--text-secondary); }
+        .stat-suggested { color: var(--warning); }
+        .stat-critical { color: var(--danger); }
+
+        .dimension-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .dimension-badge {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .dimension-badge span {
+            color: var(--text-secondary);
+            margin-left: 0.25rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow: hidden;
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1.25rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        /* Edit Form */
+        .edit-form-group {
+            margin-bottom: 1rem;
+        }
+
+        .edit-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .edit-input, .edit-textarea {
+            width: 100%;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+        }
+
+        .edit-textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .edit-input:focus, .edit-textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .option-edit {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .option-edit-header {
+            font-weight: 600;
+            color: var(--accent-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.75rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        .legend-dot.approved { background: var(--success); }
+        .legend-dot.suggested { background: var(--warning); }
+        .legend-dot.critical { background: var(--danger); }
+        .legend-dot.pending { background: var(--bg-tertiary); }
+
+        /* Expert Scores */
+        .expert-scores {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .score-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .score-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .score-high { color: var(--success); }
+        .score-medium { color: var(--warning); }
+        .score-low { color: var(--danger); }
+
+        .score-input {
+            width: 60px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.25rem;
+            color: var(--text-primary);
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .score-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        /* Filter Panel */
+        .filter-panel {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
+        }
+
+        .filter-btn.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        .filter-btn.score-high.active {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .filter-btn.score-medium.active {
+            background: var(--warning);
+            border-color: var(--warning);
+            color: #1e293b;
+        }
+
+        .filter-btn.score-low.active {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+
+        /* Score summary in nav */
+        .nav-item .score-indicator {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        /* Suggestion indicator dot */
+        .nav-item .suggestion-dot {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 10px;
+            height: 10px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            border: 2px solid var(--bg-primary);
+        }
+
+        /* Readonly input styling */
+        .score-input[readonly] {
+            background: var(--bg-tertiary);
+            cursor: help;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-warning {
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        /* Highlight */
+        .highlight-change {
+            background: rgba(234, 179, 8, 0.2);
+            border-left: 3px solid var(--warning);
+            padding-left: 0.75rem;
+            margin-left: -0.75rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-thumbnails {
+                max-width: 100%;
+                justify-content: center;
+            }
+
+            .nav-item {
+                width: 36px;
+                height: 28px;
+                font-size: 0.7rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">FBTI 题目优化审阅</div>
+            <div class="nav-thumbnails" id="navThumbnails"></div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-dot approved"></div>
+                    <span>已通过</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot suggested"></div>
+                    <span>已采纳/自定义</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot critical"></div>
+                    <span>低分需关注</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot pending"></div>
+                    <span>未审阅</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+
+        <!-- Filter Panel -->
+        <div class="filter-panel">
+            <div class="filter-title">🔍 按专家评分筛选</div>
+            <div class="filter-options">
+                <button class="filter-btn active" onclick="setFilter('all')" id="filter-all">全部题目</button>
+                <button class="filter-btn score-high" onclick="setFilter('high')" id="filter-high">保留 (8-10分)</button>
+                <button class="filter-btn score-medium" onclick="setFilter('medium')" id="filter-medium">优化 (5-7分)</button>
+                <button class="filter-btn score-low" onclick="setFilter('low')" id="filter-low">汰换 (1-4分)</button>
+                <button class="filter-btn" onclick="setFilter('unscored')" id="filter-unscored">未评分</button>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Original Question -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>📋</span>
+                        原始题目
+                    </div>
+                    <span class="badge badge-status" id="currentStatus">未审阅</span>
+                </div>
+                <div class="card-body">
+                    <div class="expert-scores" id="expertScores">
+                        <div class="score-card">
+                            <div class="score-label">电影专家</div>
+                            <input type="number" class="score-input" id="scoreFilm" min="1" max="10" placeholder="-" onchange="updateExpertScore('film', this.value)" readonly>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-label">心理学专家</div>
+                            <input type="number" class="score-input" id="scorePsych" min="1" max="10" placeholder="-" onchange="updateExpertScore('psych', this.value)" readonly>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-label">综合评分</div>
+                            <div class="score-value" id="scoreAvg">-</div>
+                        </div>
+                    </div>
+                    <div class="question-meta">
+                        <span class="badge badge-dimension" id="dimensionBadge">EA</span>
+                        <span class="badge badge-type" id="typeBadge">binary</span>
+                    </div>
+                    <div class="question-text" id="questionText"></div>
+                    <div class="options-list" id="optionsList"></div>
+                </div>
+            </div>
+
+            <!-- Suggestions -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>💡</span>
+                        修改建议
+                    </div>
+                </div>
+                <div class="card-body" id="suggestionPanel">
+                    <div class="no-suggestion">
+                        <div class="no-suggestion-icon">✅</div>
+                        <div>本题暂无修改建议</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions-panel">
+            <div class="actions-title">审阅操作</div>
+            <div class="action-buttons">
+                <button class="btn btn-success" onclick="reviewAction('approved')">
+                    <span>✓</span> 通过 - 保持原样
+                </button>
+                <button class="btn btn-warning" onclick="reviewAction('adopt')" id="adoptBtn" disabled>
+                    <span>✎</span> 采纳建议
+                </button>
+                <button class="btn btn-primary" onclick="openCustomEdit()">
+                    <span>✏️</span> 自定义修改
+                </button>
+            </div>
+            <div class="notes-section">
+                <div class="notes-label">我的修改建议</div>
+                <textarea class="notes-input" id="reviewNotes" rows="4" placeholder="输入你对这道题的修改意见...（如：选项A改为xxx，或者整题替换为xxx）" style="width: 100%;"></textarea>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-buttons">
+            <button class="btn btn-secondary" onclick="navigateQuestion(-1)">
+                <span>←</span> 上一题
+            </button>
+            <button class="btn btn-secondary" onclick="navigateQuestion(1)">
+                下一题 <span>→</span>
+            </button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-panel" style="margin-top: 1.5rem;">
+            <div class="stats-title" style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">
+                审阅统计
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value stat-approved" id="statApproved">0</div>
+                    <div class="stat-label">已通过</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-pending" id="statPending">53</div>
+                    <div class="stat-label">待审阅</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-suggested" id="statSuggested">0</div>
+                    <div class="stat-label">有修改建议</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-critical" id="statCritical">0</div>
+                    <div class="stat-label">需重构</div>
+                </div>
+            </div>
+            <div class="dimension-stats" id="dimensionStats"></div>
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <button class="btn btn-primary" onclick="exportSuggestions()" style="font-size: 1rem; padding: 0.875rem 2rem;">
+                    <span>📋</span> 导出所有修改建议
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Custom Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">自定义修改</div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="editModalBody">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveCustomEdit()">保存修改</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Suggestions Modal -->
+    <div class="modal-overlay" id="exportModal">
+        <div class="modal" style="max-width: 800px;">
+            <div class="modal-header">
+                <div class="modal-title">导出的修改建议</div>
+                <button class="modal-close" onclick="closeExportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre id="exportJson" style="background: var(--bg-primary); padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.875rem; line-height: 1.5; max-height: 50vh; overflow-y: auto;"></pre>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeExportModal()">关闭</button>
+                <button class="btn btn-success" onclick="copyToClipboard()">
+                    <span>📋</span> 复制到剪贴板
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Question Data
+        const questionsData = [
+            { id: 1, questionType: "binary", primaryDimension: "EA", text: "看完一部好电影，走出影院时你最想做的事是？", options: [{ label: "A", text: "找个安静的地方待一会儿，让情绪慢慢消化", scores: { E: 1 } }, { label: "B", text: "立刻找人聊刚才的电影，分析哪里拍得好", scores: { A: 1 } }] },
+            { id: 2, questionType: "binary", primaryDimension: "EA", text: "朋友让你推荐一部最近看的好片，你会怎么说？", options: [{ label: "A", text: "就是那种看完走在回家路上，还会一直回味的电影", scores: { E: 1 } }, { label: "B", text: "导演的叙事手法特别聪明，你有空可以仔细看看", scores: { A: 1 } }] },
+            { id: 3, questionType: "binary", primaryDimension: "EA", text: "你会因为什么重看一部看过的电影？", options: [{ label: "A", text: "想再感受一次那种情绪——不管是温暖还是心碎", scores: { E: 1 } }, { label: "B", text: "有个细节我一直想着，想回去再看一遍确认", scores: { A: 1 } }] },
+            { id: 4, questionType: "binary", primaryDimension: "EA", text: "看一部关于真实灾难的纪录片，什么最触动你？", options: [{ label: "A", text: "镜头里那些真实人物的面孔和声音", scores: { E: 1 } }, { label: "B", text: "导演为什么选这些素材、剪掉什么——他在表达什么立场", scores: { A: 1 } }] },
+            { id: 5, questionType: "binary", primaryDimension: "EA", text: "一部电影摄影和剪辑都特别棒，但你全程没什么感觉。你会觉得？", options: [{ label: "A", text: "有点可惜——技术再厉害，打动不了人还是差了点什么", scores: { E: 1 } }, { label: "B", text: "挺厉害的——好电影不一定非要煽情，纯粹的形式美也是一种境界", scores: { A: 1 } }] },
+            { id: 6, questionType: "binary", primaryDimension: "EA", text: "一部豆瓣 6.8 分的电影，你觉得不太好看。你的「不好看」主要来自？", options: [{ label: "A", text: "看完没什么感觉——它没有真正触动到我", scores: { E: 1 } }, { label: "B", text: "叙事有硬伤，角色行为不合理，主题太浅", scores: { A: 1 } }] },
+            { id: 7, questionType: "binary", primaryDimension: "EA", text: "看恐怖片的时候，你通常是什么状态？", options: [{ label: "A", text: "完全被氛围抓住——手心出汗、屏住呼吸，吓人时真的会吓到", scores: { E: 1 } }, { label: "B", text: "脑子里在分析——这个 jump scare 的节奏设计得不错", scores: { A: 1 } }] },
+            { id: 8, questionType: "binary_with_skip", primaryDimension: "EA", text: "电影的配乐让你印象深刻时，你会怎么做？", options: [{ label: "A", text: "不需要知道为什么好——音乐响起时鸡皮疙瘩起来了就够了", scores: { E: 1 } }, { label: "B", text: "会去查是谁配的，用了什么乐器，为什么放在这个场景", scores: { A: 1 } }, { label: "C", text: "我很少特别注意电影配乐", scores: {} }] },
+            { id: 9, questionType: "binary", primaryDimension: "EA", text: "你觉得一个演员「演得好」，主要是因为？", options: [{ label: "A", text: "完全忘了他在演——角色变成了一个真实的人", scores: { E: 1 } }, { label: "B", text: "能看到他的技术——微表情、口音变化、肢体语言的处理", scores: { A: 1 } }] },
+            { id: 10, questionType: "binary_with_skip", primaryDimension: "EA", text: "一部获赞的女性主义电影，有人说「太有力量了」，也有人说「太说教了」。你的第一反应是？", options: [{ label: "A", text: "先想知道它讲了一个什么样的女性故事，有没有打动人", scores: { E: 1 } }, { label: "B", text: "先想知道导演怎么处理这个议题——是靠叙事自然传达，还是直接灌输观点", scores: { A: 1 } }, { label: "C", text: "这个话题我没什么特别的想法", scores: {} }] },
+            { id: 11, questionType: "binary", primaryDimension: "XS", text: "看完一部特别喜欢的电影后，你通常会？", options: [{ label: "A", text: "顺藤摸瓜——这导演还拍过什么？演员还演过什么？一路挖下去", scores: { X: 1 } }, { label: "B", text: "锁定这个导演——翻出他的片单，从头开始一部部补", scores: { S: 1 } }] },
+            { id: 12, questionType: "binary", primaryDimension: "XS", text: "连续三个周末各看一部电影，你的选片通常会？", options: [{ label: "A", text: "跨度很大——韩国犯罪片、巴西纪录片、法国动画，完全不同方向", scores: { X: 1 } }, { label: "B", text: "集中在同一个方向——同一导演或同一类型，一口气看个过瘾", scores: { S: 1 } }] },
+            { id: 13, questionType: "binary", primaryDimension: "XS", text: "你的片单更接近哪种情况？", options: [{ label: "A", text: "年代跨度很大——从1920年代默片到最近新片，什么年代都有", scores: { X: 1 } }, { label: "B", text: "集中在一个年代——那个时期的佳作我几乎都看遍了", scores: { S: 1 } }] },
+            { id: 14, questionType: "binary", primaryDimension: "XS", text: "电影节放映一堆你完全没听过的片子，你会怎么做？", options: [{ label: "A", text: "这才是电影节的乐趣——如果都是认识的，还去干嘛", scores: { X: 1 } }, { label: "B", text: "会挑几部跟「自己方向」相关的，不会全看——时间有限", scores: { S: 1 } }] },
+            { id: 15, questionType: "binary", primaryDimension: "XS", text: "你最喜欢的类型，新出的一部口碑片让你失望了。你会怎么做？", options: [{ label: "A", text: "换换口味——这类型看腻了，正好试试别的", scores: { X: 1 } }, { label: "B", text: "回去补早期经典——可能是我还没找到这个类型真正的精华", scores: { S: 1 } }] },
+            { id: 16, questionType: "binary_with_skip", primaryDimension: "XS", text: "一部评价很高的波斯语电影，但你完全不了解伊朗文化。你会？", options: [{ label: "A", text: "好电影自己会说话——文化差异不是障碍，反而是新鲜感", scores: { X: 1 } }, { label: "B", text: "更想在自己熟悉的文化圈里找精品——了解背景能让观影体验更深", scores: { S: 1 } }, { label: "C", text: "没兴趣——文化远不远无所谓，就是不想看", scores: {} }] },
+            { id: 17, questionType: "binary", primaryDimension: "XS", text: "有人说「你只看某一类电影，太局限了」，你的反应？", options: [{ label: "A", text: "有道理——电影世界这么大，只待在一个角落确实可惜", scores: { X: 1 } }, { label: "B", text: "不认同——在一个领域看到极致，比浅尝辄止十种类型更有价值", scores: { S: 1 } }] },
+            { id: 18, questionType: "binary", primaryDimension: "XS", text: "除了院线故事片，短片、实验影像、影像装置、VR 电影这些形式你感兴趣吗？", options: [{ label: "A", text: "非常——只要是影像叙事，什么载体我都想试试", scores: { X: 1 } }, { label: "B", text: "更专注传统长片——我相信把最经典的形式研究透比什么都重要", scores: { S: 1 } }] },
+            { id: 19, questionType: "multi", primaryDimension: "XS", text: "你发现新电影主要靠什么渠道？", options: [{ label: "A", text: "到处都能捡到——短视频、公众号、播客、算法推荐，来源越杂发现越多", scores: { X: 1 } }, { label: "B", text: "几个固定信任的来源——一两个品味验证过的影评人或博主", scores: { S: 1 } }, { label: "C", text: "电影节/颁奖季片单——戛纳、威尼斯、奥斯卡的提名出来就是我的年度选片指南", scores: { X: 0.5, A: 0.5 } }, { label: "D", text: "朋友和影迷社群——聊天聊出来的、豆瓣小组推荐的，比任何算法都靠谱", scores: { S: 0.5, E: 0.5 } }] },
+            { id: 20, questionType: "multi", primaryDimension: "XS", text: "面对「一生必看的 100 部电影」这种榜单，你的态度？", options: [{ label: "A", text: "当作起点——从榜单出发，往外延伸到榜单没有的角落", scores: { X: 1 } }, { label: "B", text: "当作地图——认真一部一部看完，把每一部都看透再说", scores: { S: 1 } }, { label: "C", text: "懒得看——管它什么经典必看，我只看自己当下想看的", scores: { X: 0.5 } }] },
+            { id: 21, questionType: "binary", primaryDimension: "PW", text: "两部电影同时上映，你只能选一部。你走进哪个？", options: [{ label: "A", text: "一个中年女人在母亲去世后独自整理遗物的周末", scores: { P: 1 } }, { label: "B", text: "一个帝国在三代人的时间里从崛起走向崩溃", scores: { W: 1 } }] },
+            { id: 22, questionType: "binary", primaryDimension: "PW", text: "一部三年前看的电影，现在还留在脑子里的是什么？", options: [{ label: "A", text: "某个特定的表情、一句台词、一个沉默了五秒的瞬间", scores: { P: 1 } }, { label: "B", text: "那个世界的整体质感——氛围、规则、它给你的宏观震撼", scores: { W: 1 } }] },
+            { id: 23, questionType: "binary", primaryDimension: "PW", text: "你理想中的公路电影是什么样的？", options: [{ label: "A", text: "出发时带着一个解不开的心结，终点无所谓——重要的是路上他终于想通了", scores: { P: 1 } }, { label: "B", text: "每经过一个地方都是一个新世界——沿途的风景、城镇和陌生人才是真正的主角", scores: { W: 1 } }] },
+            { id: 24, questionType: "binary", primaryDimension: "PW", text: "你更容易被哪种电影结构吸引？", options: [{ label: "A", text: "一两个核心角色——你有足够时间走进他们的内心深处", scores: { P: 1 } }, { label: "B", text: "多线叙事、角色交织——一群人的命运拼出一幅时代群像", scores: { W: 1 } }] },
+            { id: 25, questionType: "binary", primaryDimension: "PW", text: "同一场历史事件，拍成两部电影。你更想看？", options: [{ label: "A", text: "从一个普通人的视角——一封家书、一段日记、一个人的战争", scores: { P: 1 } }, { label: "B", text: "从全景视角——多条战线、多方博弈、整场战争的全貌", scores: { W: 1 } }] },
+            { id: 26, questionType: "binary_with_skip", primaryDimension: "PW", text: "你理想中的科幻电影是？", options: [{ label: "A", text: "外太空只是内心的隐喻——一个人在极端环境中面对孤独、记忆和自我", scores: { P: 1 } }, { label: "B", text: "一个全新的文明——全新的物理法则、社会结构、你从未想象过的世界", scores: { W: 1 } }, { label: "C", text: "科幻片我不怎么看", scores: {} }] },
+            { id: 27, questionType: "binary_with_skip", primaryDimension: "PW", text: "一部关于性别议题的电影，你更希望它怎么讲？", options: [{ label: "A", text: "聚焦一个人的故事——她的困境、她的觉醒、她不被定义的选择", scores: { P: 1 } }, { label: "B", text: "展开一幅全景——制度、文化、代际关系如何共同塑造了今天的处境", scores: { W: 1 } }, { label: "C", text: "这类话题不是我看电影时会关注的", scores: {} }] },
+            { id: 28, questionType: "multi", primaryDimension: "PW", text: "犯罪电影最让你「爽」的部分是什么？", options: [{ label: "A", text: "角色的堕落弧线——看一个人一步步走向深渊，明知不对但移不开眼", scores: { P: 1 } }, { label: "B", text: "智力博弈——计划、反转、局中局，看谁比谁更聪明", scores: { W: 0.5, A: 0.5 } }, { label: "C", text: "系统的暗面——权力怎么运转、钱怎么流动、规则怎么在桌子下面被改写", scores: { W: 1 } }, { label: "D", text: "纯粹的肾上腺素——追车、枪战、千钧一发，就是要那个紧张感", scores: { E: 0.5 } }, { label: "E", text: "犯罪片不是我的菜", scores: {} }] },
+            { id: 29, questionType: "binary_with_skip", primaryDimension: "PW", text: "你更被哪种动画电影打动？", options: [{ label: "A", text: "一个生命体的内在旅程——关于成长、失去、和理解「我是谁」", scores: { P: 1 } }, { label: "B", text: "一个奇幻世界的宏大冒险——新物种、新法则、一场改变一切的远征", scores: { W: 1 } }, { label: "C", text: "这些电影我没看过", scores: {} }] },
+            { id: 30, questionType: "binary", primaryDimension: "PW", text: "一部电影的结局让你满足，通常是因为？", options: [{ label: "A", text: "那个人终于放下了——也许外面什么都没变，但他跟自己和解的那一刻，你的眼眶也热了", scores: { P: 1 } }, { label: "B", text: "拼图终于合上了——所有伏线回收、势力洗牌，整个世界在最后五分钟露出全貌", scores: { W: 1 } }] },
+            { id: 31, questionType: "binary", primaryDimension: "LD", text: "凌晨一点睡不着，你更可能打开？", options: [{ label: "A", text: "一部你知道会让你安心的电影——哪怕已经看过好几遍", scores: { L: 1 } }, { label: "B", text: "一部你一直「没准备好」看的电影——正好，深夜适合硬来", scores: { D: 1 } }] },
+            { id: 32, questionType: "multi", primaryDimension: "LD", text: "你更喜欢哪种喜剧？", options: [{ label: "A", text: "从头暖到尾——走出影院觉得世界还不错", scores: { L: 1 } }, { label: "B", text: "笑着笑着就不对劲——黑色幽默、辛辣讽刺，笑完开始反思", scores: { D: 1 } }, { label: "C", text: "纯粹的爆笑——不用走心不用反思，全场笑到肚子疼就够了", scores: { L: 0.5, E: 0.5 } }, { label: "D", text: "尬到脚趾抠地——荒诞、冒犯、社死喜剧，笑完浑身不自在", scores: { D: 0.5, X: 0.5 } }, { label: "E", text: "我不太看喜剧", scores: {} }] },
+            { id: 33, questionType: "binary", primaryDimension: "LD", text: "你和恐怖片的关系是？", options: [{ label: "A", text: "几乎不看——不是不敢，就是不太享受被恐惧支配的感觉", scores: { L: 1 } }, { label: "B", text: "会主动找来看——从《咒怨》到《中邪》，好的恐怖片提供的心理体验是其他类型给不了的", scores: { D: 1 } }] },
+            { id: 34, questionType: "binary_with_skip", primaryDimension: "LD", text: "你更能接受哪种电影主角？", options: [{ label: "A", text: "有裂缝的好人——他会犯错、会软弱，但你看到他心底那束光就觉得值了", scores: { L: 1 } }, { label: "B", text: "迷人的灰色——你知道他不是好人，但他的每一步你都理解，甚至差点站在他那边", scores: { D: 1 } }, { label: "C", text: "这些电影我没看过", scores: {} }] },
+            { id: 35, questionType: "binary", primaryDimension: "LD", text: "你更享受哪种结局体验？", options: [{ label: "A", text: "故事收束，情感落地——带着一种「圆满」的感觉离开", scores: { L: 1 } }, { label: "B", text: "故事在一个不安的位置停下——带着一脑子问题走出影院", scores: { D: 1 } }] },
+            { id: 36, questionType: "binary", primaryDimension: "LD", text: "电影中的暴力场景，你的态度是？", options: [{ label: "A", text: "好导演可以用暗示和留白传达同样的力量——不一定要直接呈现", scores: { L: 1 } }, { label: "B", text: "如果故事需要，直接面对比回避更有冲击力——别替观众做选择", scores: { D: 1 } }] },
+            { id: 37, questionType: "binary_with_skip", primaryDimension: "LD", text: "两部关于底层生活的电影，你更想看？", options: [{ label: "A", text: "苦中有光——在困境里，人与人之间的温情和坚韧", scores: { L: 1 } }, { label: "B", text: "不留退路——系统性的碾压，没有温情滤镜，只有真实的重量", scores: { D: 1 } }, { label: "C", text: "这些电影我没看过", scores: {} }] },
+            { id: 38, questionType: "binary", primaryDimension: "LD", text: "一部关于反抗运动的电影，你更想看它怎么拍？", options: [{ label: "A", text: "侧重希望和团结——人们如何在压迫中找到力量、彼此支撑", scores: { L: 1 } }, { label: "B", text: "侧重代价和残酷——反抗者付出了什么、失去了什么、最后得到了什么", scores: { D: 1 } }] },
+            { id: 39, questionType: "binary", primaryDimension: "LD", text: "一部电影曾让你情绪崩溃。你会再看一遍吗？", options: [{ label: "A", text: "不会——那种被碾压的感觉，经历一次就够了", scores: { L: 1 } }, { label: "B", text: "会——被彻底击碎的体验本身就是一种深刻的存在感，值得再来", scores: { D: 1 } }] },
+            { id: 40, questionType: "binary_with_skip", primaryDimension: "LD", text: "你更喜欢哪种「用孩子的眼睛看世界」的电影？", options: [{ label: "A", text: "世界在孩子眼里是有魔法的——后院能通向另一个宇宙，雨天是探险日", scores: { L: 1 } }, { label: "B", text: "大人的谎言在孩子面前无处遁形——他们不理解「规则」，所以能看见每一道裂缝", scores: { D: 1 } }, { label: "C", text: "这些电影我没看过", scores: {} }] },
+            { id: 41, questionType: "multi", primaryDimension: "EA", text: "看完一部电影后，什么会一直留在你脑子里？", options: [{ label: "A", text: "一句台词——某句话钉在脑子里，隔几个月还会突然冒出来", scores: { E: 1 } }, { label: "B", text: "一个画面——某个构图、某种光影，像照片一样印在记忆里", scores: { E: 0.5, A: 0.5 } }, { label: "C", text: "故事结构——某个转折或叙事设计让我忍不住反复回味", scores: { A: 1 } }, { label: "D", text: "一种氛围——说不上来具体是什么，但整部片的气质一直跟着你", scores: { E: 1 } }] },
+            { id: 42, questionType: "multiSelect", primaryDimension: "EA", text: "你心目中的「名场面」是哪一种？（可选 1-2 个）", options: [{ label: "A", text: "视觉奇观——震撼到窒息的画面扑面而来", scores: { A: 0.5, W: 0.5 } }, { label: "B", text: "演员的瞬间——一个眼神、一次嘴角的颤抖，比台词更有力量", scores: { E: 1, P: 0.5 } }, { label: "C", text: "导演的签名——特殊的运镜、剪辑或视角一看就知道是谁拍的", scores: { A: 1 } }, { label: "D", text: "经典构图——几个人往那一站，画面本身就是一个故事", scores: { A: 0.5, E: 0.5 } }] },
+            { id: 43, questionType: "multiSelect", primaryDimension: "XS", text: "以下是豆瓣 Top 250 中排名最高的四部华语电影，哪部最让你有共鸣？（可选 1-2 个）", options: [{ label: "A", text: "《霸王别姬》——一个人、一出戏、一个时代的倒塌（豆瓣 9.6，华语片第一）", scores: { S: 1, E: 0.5 } }, { label: "B", text: "《活着》——富贵一辈子什么都没了，但他还活着（豆瓣 9.3，张艺谋巅峰）", scores: { S: 0.5, P: 0.5, D: 0.5 } }, { label: "C", text: "《大话西游之大圣娶亲》——年轻时觉得搞笑，长大了才知道是悲剧（豆瓣 9.2，cult 经典）", scores: { X: 0.5, E: 0.5, L: 0.5 } }, { label: "D", text: "《让子弹飞》——「站着，还把钱给挣了」，姜文最爽的一次（豆瓣 9.0，类型片天花板）", scores: { X: 0.5, A: 0.5 } }, { label: "E", text: "这几部都没怎么看过", scores: {} }] },
+            { id: 44, questionType: "multi", primaryDimension: "XS", text: "互联网把电影分成了「小妞电影」（浪漫、时尚、闺蜜、成长）和「老登电影」（黑帮、权谋、兄弟、硬汉）。看看你自己的片单——", options: [{ label: "A", text: "确实偏「小妞」那边——好看的爱情喜剧和女性成长故事永远看不腻", scores: { S: 0.5, E: 0.5 } }, { label: "B", text: "确实偏「老登」那边——权力游戏和男性世界的暗面对我有致命吸引力", scores: { S: 0.5, A: 0.5 } }, { label: "C", text: "两边都看——上午看《穿 Prada 的女魔头》下午看《教父》，完全不矛盾", scores: { X: 1 } }, { label: "D", text: "这分法本身就有问题——好电影不需要被性别标签归类", scores: { A: 1 } }, { label: "E", text: "我不太了解这些说法", scores: {} }] },
+            { id: 45, questionType: "multi", primaryDimension: "PW", text: "一部关于同性爱情的电影，你更想看它怎么拍？", options: [{ label: "A", text: "两个人之间的亲密宇宙——不需要宏大叙事，一段感情本身就是全部", scores: { P: 1, E: 0.5 } }, { label: "B", text: "一个人在身份认同中的漫长挣扎——肤色、性向、阶级交织的内心风暴", scores: { P: 1, D: 0.5 } }, { label: "C", text: "一个群体争取被看见的过程——个人故事是整个运动的入口", scores: { W: 1 } }, { label: "D", text: "这类题材我没有特别的偏好", scores: {} }] },
+            { id: 46, questionType: "multi", primaryDimension: "PW", text: "一部关于种族或少数群体经历的电影，以下哪种最吸引你？", options: [{ label: "A", text: "一个人的身份觉醒——肤色、血统或出身如何在他身体里制造了一场内战", scores: { P: 1, D: 0.5 } }, { label: "B", text: "一个系统的解剖——制度性歧视如何运作，谁在维护它，谁在反抗它", scores: { W: 1, A: 0.5 } }, { label: "C", text: "一个文化的自我表达——不以苦难为主题，而是展示一种生活方式本身的质感和骄傲", scores: { W: 0.5, L: 0.5, E: 0.5 } }, { label: "D", text: "这个话题我没什么特别的偏好", scores: {} }] },
+            { id: 47, questionType: "multi", primaryDimension: "LD", text: "关于科幻电影里的「科学」，你的立场是？", options: [{ label: "A", text: "硬科幻才是正道——《火星救援》的种土豆必须有化学依据，《三体》的物理设定必须经得起推敲", scores: { A: 1, D: 0.5 } }, { label: "B", text: "科幻的核心是「幻」不是「科」——《银翼杀手》不需要解释仿生人的技术原理也是神作", scores: { E: 0.5, D: 0.5 } }, { label: "C", text: "太空歌剧最带劲——《星球大战》《沙丘》那种，科学设定是舞台，传奇才是主角", scores: { E: 0.5, W: 0.5, L: 0.5 } }, { label: "D", text: "无所谓——只要故事好看就行，我不在乎硬不硬", scores: { E: 0.5 } }, { label: "E", text: "我不怎么看科幻片", scores: {} }] },
+            { id: 48, questionType: "multi", primaryDimension: "LD", text: "以下哪部「争议电影」你最想看（或最让你着迷）？", options: [{ label: "A", text: "《色，戒》——李安把情欲拍成了政治武器，每一场床戏都是权力博弈", scores: { D: 1, E: 0.5 } }, { label: "B", text: "《发条橙》——库布里克把暴力拍成了美学，50 年后依然让人不安", scores: { D: 1, A: 0.5 } }, { label: "C", text: "《颐和园》——娄烨拍出了一代人的身体和精神创伤，至今无法在大陆公映", scores: { D: 0.5, P: 0.5, E: 0.5 } }, { label: "D", text: "《索多玛 120 天》——帕索里尼用极端影像控诉法西斯，大部分人看不完", scores: { D: 1.5 } }, { label: "E", text: "这类电影我不感兴趣 / 都没看过", scores: { L: 0.5 } }] },
+            { id: 49, questionType: "multi", primaryDimension: "XS", text: "关于「在特定时间看特定电影」这件事，你是？", options: [{ label: "A", text: "有固定仪式——圣诞节看《真爱至上》，春节看喜剧贺岁片，入秋了想看《秋日和》", scores: { S: 1, L: 0.5 } }, { label: "B", text: "没有固定仪式，但会被季节/心情驱动——冬天确实想看暖片，深夜确实想看暗片", scores: { E: 0.5, S: 0.5 } }, { label: "C", text: "完全随机——什么时候看什么跟季节没关系", scores: { X: 0.5 } }, { label: "D", text: "没想过这个问题", scores: {} }] },
+            { id: 50, questionType: "multi", primaryDimension: "none", text: "你去影院看电影时，选的最多的是什么厅？", options: [{ label: "A", text: "IMAX——要看就看最大的，沉浸感第一", scores: {} }, { label: "B", text: "杜比影院 / 杜比全景声——画质和音质都拉满，细节控的天堂", scores: {} }, { label: "C", text: "激光厅 / CGS 中国巨幕——性价比之选，体验比普通厅好不少", scores: {} }, { label: "D", text: "普通厅——看的是电影本身，不是厅", scores: {} }, { label: "E", text: "我不太关注厅的类型 / 忘记了", scores: {} }, { label: "F", text: "我基本不去影院", scores: {} }] },
+            { id: 51, questionType: "multi", primaryDimension: "EA", text: "你更享受哪种观影方式？", options: [{ label: "A", text: "去影院——大银幕、全黑环境、和一屋子陌生人一起笑一起屏息", scores: { E: 0.5, W: 0.5 } }, { label: "B", text: "窝在家里——沙发、毯子、想暂停就暂停、想倒回去就倒回去", scores: { A: 0.5, P: 0.5 } }, { label: "C", text: "取决于片子——大场面去影院，文艺片在家看", scores: { X: 0.5 } }, { label: "D", text: "无所谓 / 都行", scores: {} }] },
+            { id: 52, questionType: "multi", primaryDimension: "EA", text: "你更喜欢一个人看电影，还是和别人一起看？", options: [{ label: "A", text: "一个人——可以完全沉浸，不用在意旁边人的反应", scores: { E: 0.5, P: 0.5 } }, { label: "B", text: "和朋友或伴侣——看完走出来能立刻讨论，是最爽的部分", scores: { A: 0.5 } }, { label: "C", text: "和一群陌生人在满座的影厅里——全场一起笑、一起倒吸冷气", scores: { E: 1 } }, { label: "D", text: "都行 / 没有明显偏好", scores: {} }] },
+            { id: 53, questionType: "multi", primaryDimension: "XS", text: "你买电影票的风格是？", options: [{ label: "A", text: "提前蹲守型——关注上映日期、研究排片、提前好几天买票选最佳座位", scores: { S: 1 } }, { label: "B", text: "临时起意型——今晚想看电影了，打开 app 看看最近的场次有什么", scores: { X: 0.5, E: 0.5 } }, { label: "C", text: "口碑等待型——等朋友看完、等豆瓣评分稳定了再决定去不去", scores: { A: 0.5, S: 0.5 } }, { label: "D", text: "我基本在线上看，不怎么买电影票", scores: {} }] }
+        ];
+
+        // Expert Scores Data
+        const filmExpertScores = {
+            1: { score: 9, reason: "清晰二元对立，选项准确对应感受流和拆片流影迷的真实行为" },
+            2: { score: 8, reason: "推荐方式的差异能有效区分E/A维度，选项贴近日常情景" },
+            3: { score: 9, reason: "重看动机的设置完全对应两种心理状态，区分度强" },
+            4: { score: 8, reason: "纪录片选项恰当，E/A差异明显，纪录题材适配度高" },
+            5: { score: 8, reason: "技术与感受的权衡问题设置精妙，选项差异显著" },
+            6: { score: 7, reason: "能区分感受型和分析型评判，但情景稍显常规" },
+            7: { score: 9, reason: "恐怖片观影状态的二分非常精准，对应真实影迷类型" },
+            8: { score: 8, reason: "配乐感知层次完善，skip选项恰当，星际穿越举例权威" },
+            9: { score: 9, reason: "演技判断的沉浸感vs技术感完全对应E/A，高度有代表性" },
+            10: { score: 7, reason: "女性主义题材设置合理，但选项措辞稍显冗长" },
+            11: { score: 9, reason: "看完好片后的行为模式完全对应X/S维度，区分度极高" },
+            12: { score: 8, reason: "选片跨度的差异能清晰区分拓荒者和考古者" },
+            13: { score: 9, reason: "年代跨度问题设置经典，举例具体有代表性" },
+            14: { score: 8, reason: "电影节态度的选择准确体现X/S差异" },
+            15: { score: 8, reason: "失望后的反应选项逻辑清晰，能有效区分两种观影态度" },
+            16: { score: 9, reason: "陌生文化与电影欣赏的关系精准测量X/S，一次别离举例完美" },
+            17: { score: 8, reason: "深耕vs广泛的价值判断能区分X/S" },
+            18: { score: 8, reason: "格式探索兴趣明确区分两种类型" },
+            19: { score: 7, reason: "选片渠道多元但四个选项的区分度不均" },
+            20: { score: 8, reason: "经典榜单态度的三个选项各具特色" },
+            21: { score: 9, reason: "特写vs全景的选择完全对应P/W维度" },
+            22: { score: 9, reason: "三年后的记忆保留形式准确反映P/W差异" },
+            23: { score: 9, reason: "公路电影的两种理解完全对应P/W" },
+            24: { score: 8, reason: "群戏vs独角戏的取舍清晰体现P/W差异" },
+            25: { score: 9, reason: "同一事件的两个视角完美代表P/W差异" },
+            26: { score: 8, reason: "科幻的两种切入角度对应P/W，月球和沙丘举例恰当" },
+            27: { score: 7, reason: "性别议题的两个角度能区分P/W，但部分受众倾向skip" },
+            28: { score: 9, reason: "犯罪片快感的四层递进很好，体现P/W和其他维度" },
+            29: { score: 8, reason: "动画电影的两种类型区分P/W，举例经典" },
+            30: { score: 8, reason: "结局满足的两个来源清晰对应P/W" },
+            31: { score: 9, reason: "深夜选片完全对应L/D维度" },
+            32: { score: 9, reason: "喜剧偏好的四层次设置完善" },
+            33: { score: 8, reason: "恐怖片态度清晰分化L/D" },
+            34: { score: 9, reason: "好人vs灰色角色完美体现L/D" },
+            35: { score: 8, reason: "结局体验的圆满vs不安完全对应L/D差异" },
+            36: { score: 8, reason: "暴力呈现的美学选择能体现L/D" },
+            37: { score: 9, reason: "底层叙事的两个角度完美对应L/D" },
+            38: { score: 8, reason: "反抗运动的希望vs代价能区分L/D" },
+            39: { score: 8, reason: "重看被摧毁的体验能体现L/D心理差异" },
+            40: { score: 9, reason: "儿童视角的魔法vs残酷完全对应L/D" },
+            41: { score: 8, reason: "电影记忆的四个锚点能各自对应不同人格" },
+            42: { score: 8, reason: "名场面的四种定义各具代表性" },
+            43: { score: 9, reason: "华语TOP电影的四部选择准确体现差异" },
+            44: { score: 7, reason: "性别标签分类有预设引导" },
+            45: { score: 8, reason: "酷儿电影的三种表现方式对应P/W" },
+            46: { score: 8, reason: "少数族裔电影的三个角度各异" },
+            47: { score: 9, reason: "硬科幻vs软科幻vs太空歌剧的三分法专业" },
+            48: { score: 8, reason: "争议电影的四部选择各代表不同议题" },
+            49: { score: 8, reason: "季节性观影仪式的设置创意十足" },
+            50: { score: 6, reason: "影厅选择主要测量技术偏好而非人格维度" },
+            51: { score: 8, reason: "观影环境的选择能区分多维度" },
+            52: { score: 9, reason: "独看vs陪看vs集体观影清晰区分E/A" },
+            53: { score: 7, reason: "购票习惯能反映部分X/S特征，但更多测行为习惯" }
+        };
+
+        const psychExpertScores = {
+            1: { score: 8, reason: "EA维度清晰，情绪消化vs理性分析对立明确，区分度高" },
+            2: { score: 8, reason: "EA维度纯净，推荐理由直指情感共鸣vs形式分析" },
+            3: { score: 8, reason: "EA维度典型，重看动机界定清晰，两极等价吸引" },
+            4: { score: 7, reason: "B选项附加的立场分析削弱了EA主轴纯粹性" },
+            5: { score: 8, reason: "EA维度优，可惜vs厉害的权衡清晰" },
+            6: { score: 7, reason: "触动和缺陷的对立不如其他题目锐利" },
+            7: { score: 8, reason: "EA维度优秀，沉浸恐惧vs分析设计对比精准" },
+            8: { score: 7, reason: "B选项的查究行为可能混入X维度" },
+            9: { score: 8, reason: "忘了他在演vs看到技术二元对立完美" },
+            10: { score: 7, reason: "故事共鸣vs处理方式的区分不如其他题目锐利" },
+            11: { score: 8, reason: "XS维度典型，顺藤摸瓜vs锁定深耕对立清晰" },
+            12: { score: 8, reason: "选片跨度直观反映X(广探)vs S(深耕)" },
+            13: { score: 8, reason: "年代跨度是X的典型表现" },
+            14: { score: 8, reason: "电影节态度有力反映拓荒者vs考古者核心差异" },
+            15: { score: 8, reason: "失望后换口味vs回补经典表现性格本质" },
+            16: { score: 7, reason: "陌生语言电影可能混入品味与开放度" },
+            17: { score: 8, reason: "局限vs极致的价值观对立有效区分X/S" },
+            18: { score: 7, reason: "实验影像兴趣可能更反映A维度而非纯X/S" },
+            19: { score: 8, reason: "四个选项层次清晰，有效覆盖不同信息来源模式" },
+            20: { score: 8, reason: "经典榜单三种态度清晰映射X/S" },
+            21: { score: 9, reason: "PW维度完美，细节vs宏观对立经典有力" },
+            22: { score: 9, reason: "特定瞬间vs整体质感是维度最佳体现" },
+            23: { score: 8, reason: "心结解开(P)vs沿途风景(W)有效" },
+            24: { score: 8, reason: "核心角色vs群戏多线映射P/W本质" },
+            25: { score: 8, reason: "一个人视角vs全景战争清晰有力" },
+            26: { score: 7, reason: "科幻P(内心隐喻)vs W(外部世界)界分不够锐利" },
+            27: { score: 8, reason: "一个人故事vs全景制度体现维度本质" },
+            28: { score: 7, reason: "四个选项有明显A维度污染和E维度信号" },
+            29: { score: 8, reason: "内在旅程vs奇幻冒险在动画框架下有效" },
+            30: { score: 8, reason: "和解(P)vs拼图合上(W)结局满足感对立典型" },
+            31: { score: 8, reason: "安心重温vs主动硬来体现温暖vs冲击核心" },
+            32: { score: 8, reason: "四个选项层次分明，覆盖暖喜剧到社死喜剧频谱" },
+            33: { score: 8, reason: "几乎不看vs主动寻求直指L/D本质" },
+            34: { score: 8, reason: "有裂缝好人vs迷人灰色道德立场对比清晰" },
+            35: { score: 8, reason: "收束vs悬置的结局偏好直映L/D追求" },
+            36: { score: 7, reason: "暗示vs直接呈现涉及拍摄手法而非单纯情感体验" },
+            37: { score: 8, reason: "苦中有光vs系统碾压体现L(温暖)vs D(黑暗)" },
+            38: { score: 8, reason: "侧重希望vs侧重代价映射L/D差异" },
+            39: { score: 8, reason: "拒绝再经历vs渴望再被击碎反映L/D根本差异" },
+            40: { score: 7, reason: "魔法世界vs看穿虚伪对比稍显不够直接" },
+            41: { score: 7, reason: "画面选项E/A混合(0.5+0.5)弱化维度纯度" },
+            42: { score: 6, reason: "维度污染严重，视觉奇观/演员瞬间/导演签名混杂EA和PW" },
+            43: { score: 6, reason: "四部电影选择更多反映偏好风格而非X/S本质差异" },
+            44: { score: 5, reason: "混入类型偏好和社会观点，难以纯粹测X/S" },
+            45: { score: 6, reason: "P/D/W混杂，E维度对P的污染不容忽视" },
+            46: { score: 5, reason: "三个选项混入D/A/E，维度污染严重" },
+            47: { score: 6, reason: "A维度污染明显(硬科幻强调逻辑)，E/A污染>L/D主信号" },
+            48: { score: 5, reason: "电影选择更多反映艺术追求和知识分子品味而非L/D" },
+            49: { score: 7, reason: "季节仪式vs随机可接受，但心情驱动混入E维度" },
+            50: { score: 3, reason: "无主维度得分，仅有隐信号，无法作为维度测量使用" },
+            51: { score: 6, reason: "混入XS和PW维度，不是EA的纯粹测量" },
+            52: { score: 7, reason: "既测EA也测PW，维度混杂" },
+            53: { score: 5, reason: "口碑等待混入A维度，整体区分度不足" }
+        };
+
+        // Suggestions Data
+        const suggestionsData = {
+            1: {
+                type: 'option',
+                optionIndex: 1,
+                original: "立刻找人聊刚才的电影，分析哪里拍得好",
+                suggested: "立刻找个出口——要么找人聊，要么刷影评看讨论，总之想听听别人怎么说",
+                reason: "扩大A选项覆盖面，涵盖线上线下多种方式"
+            },
+            2: {
+                type: 'option',
+                optionIndex: 1,
+                original: "导演的叙事手法特别聪明，你有空可以仔细看看",
+                suggested: "导演/摄影师的手法特别聪明——不管是叙事节奏、镜头运动还是视觉构图，都是教科书级别",
+                reason: "从叙事手法泛化为导演/摄影的技术手法"
+            },
+            4: {
+                type: 'option',
+                optionIndex: 0,
+                original: "镜头里那些真实人物的面孔和声音",
+                suggested: "被这些真实故事击中——那些人的处境、他们的痛苦，我没办法不去感受",
+                reason: "原A选项可能被A类人选（审视真实素材），需强化情感同理"
+            },
+            5: {
+                type: 'option',
+                optionIndex: 0,
+                original: "有点可惜——技术再厉害，打动不了人还是差了点什么",
+                suggested: "这就不是给我的电影——形式再精妙，也要有什么能触碰到我",
+                reason: "涉及L/D维度污染，需聚焦E的核心——是否需要情感链接"
+            },
+            6: {
+                type: 'option',
+                optionIndex: 0,
+                original: "看完没什么感觉——它没有真正触动到我",
+                suggested: "就是有点空洞——看完没留下什么印象或感受，像是白看了",
+                reason: "与Q5重复度过高"
+            },
+            7: {
+                type: 'full_redesign',
+                title: '重新设计选项（从2选项变为4选项）',
+                newQuestion: "看恐怖片时，你的心态更接近哪一种？",
+                newOptions: [
+                    { label: "A", text: "完全浸入恐怖中——被吓到是享受，紧张的氛围本身就是最好的体验（E）", scores: { E: 1 } },
+                    { label: "B", text: "一边看一边拆解——这个演员的尖叫是不是不够自然，这个转场设计得咋样（A）", scores: { A: 1 } },
+                    { label: "C", text: "既不能完全沉浸，也不会真的分析——就是普通地看，等着故事吓唬你（中性）", scores: {} },
+                    { label: "SKIP", text: "我基本不看恐怖片", scores: {} }
+                ],
+                reason: "增加第三选项纳入普通观众"
+            },
+            8: {
+                type: 'option',
+                optionIndex: 0,
+                original: "不需要知道为什么好——音乐响起时鸡皮疙瘩起来了就够了",
+                suggested: "不需要知道为什么好——音乐响起的那一刻，那种情绪直接进来了，其他都不重要",
+                reason: "原文偏生理反应描写，需强调即时情绪链接"
+            },
+            11: {
+                type: 'full_redesign',
+                title: '重新设计选项',
+                newQuestion: "看完一部特别喜欢的电影后，你的'下一步行动'通常是？",
+                newOptions: [
+                    { label: "A", text: "继续追——这部电影有续集吗？系列其他作品有什么？先把整个系列打通（S）", scores: { S: 1 } },
+                    { label: "B", text: "扩散搜索——这位演员/导演/编剧在别的电影里怎么样？不同作品间有什么联系（X）", scores: { X: 1 } },
+                    { label: "C", text: "沉浸式研究——这部电影好在哪儿？同导演的前作后作有什么变化？逐部细看这个创作者的演变（S）", scores: { S: 1 } },
+                    { label: "SKIP", text: "看完就看完了，不一定会专门去找其他作品", scores: {} }
+                ],
+                reason: "用具体行为替代抽象概念"
+            },
+            14: {
+                type: 'add_options',
+                title: '增加选项',
+                addedOptions: [
+                    { label: "C", text: "看一些预告和影评后再筛选，避免走冤枉路（S/A混合）", scores: { S: 0.5, A: 0.5 } },
+                    { label: "SKIP", text: "我没参与过电影节", scores: {} }
+                ],
+                reason: "提升包容性"
+            },
+            15: {
+                type: 'option',
+                optionIndex: 1,
+                original: "回去补早期经典——可能是我还没找到这个类型真正的精华",
+                suggested: "深入研究这个类型——找出那些被忽视的好片，看看自己是不是真正理解这个类型的精妙之处",
+                reason: "强化S人的深度研究特征"
+            },
+            16: {
+                type: 'option',
+                optionIndex: 1,
+                original: "更想在自己熟悉的文化圈里找精品——了解背景能让观影体验更深",
+                suggested: "先研究一下伊朗电影背景和文化背景再决定——充分理解才能看懂好片",
+                reason: "原B测的是保守性而非S"
+            },
+            21: {
+                type: 'full_redesign',
+                title: '完全重新设计选项（同题材不同视角）',
+                newQuestion: "两部电影同时上映，你只能选一部。你走进哪个？",
+                newOptions: [
+                    { label: "A", text: "一对初恋情侣在一个漫长的雨夜里的对话和沉默——整部电影就在一个房间里，你可以看清他们脸上的每一丝表情变化（P）", scores: { P: 1 } },
+                    { label: "B", text: "同一对初恋情侣的故事，但跨越整个大学四年，从他们相识、同居、分手到各自成长——每一年一个地点，每个季节一个转折（W）", scores: { W: 1 } },
+                    { label: "C", text: "看情绪和最近的心境——心情脆弱时看第一种，想看宏大叙事时选第二种（无维度）", scores: {} },
+                    { label: "SKIP", text: "两种都感兴趣 / 看到好评再决定", scores: {} }
+                ],
+                reason: "统一题材避免因题材偏好影响选择"
+            },
+            26: {
+                type: 'full_redesign',
+                title: '重新设计',
+                newQuestion: "你最喜欢哪种科幻电影的切入方式？",
+                newOptions: [
+                    { label: "A", text: "一个人vs宇宙——孤独的宇航员、被困的飞行员，关键词是隔离、自救、内心极限（P）", scores: { P: 1 } },
+                    { label: "B", text: "全新的世界系统——陌生的行星、陌生的物种、陌生的法则，让我沉浸在完全不同的文明中（W）", scores: { W: 1 } },
+                    { label: "C", text: "科幻的人性角度——科幻背景下的爱情、家庭、信任问题，比世界观本身更吸引我（P/E混合）", scores: { P: 0.5, E: 0.5 } },
+                    { label: "SKIP", text: "科幻片我不怎么看", scores: {} }
+                ],
+                reason: "紧贴科幻题材的具体呈现方式"
+            },
+            28: {
+                type: 'option',
+                optionIndex: 1,
+                original: "智力博弈——计划、反转、局中局，看谁比谁更聪明",
+                suggested: "角色之间的心理战——我和你都在试探对方，每个眼神都是博弈",
+                reason: "原智力博弈模糊可P可W"
+            },
+            34: {
+                type: 'full_redesign',
+                title: '三元选项文案更新',
+                newQuestion: "你更能接受哪种电影主角？",
+                newOptions: [
+                    { label: "A", text: "清晰的善良，但有人性的脆弱——他想做对的事，会失败、会内疚、会遍体鳞伤，但那束良心的光从不熄灭（L）", scores: { L: 1 } },
+                    { label: "B", text: "真实的暗面，不自欺不欺人——他清楚自己在做什么、为什么做，那种诚实本身就有致命的魅力（D）", scores: { D: 1 } },
+                    { label: "C", text: "道德的雾区——每一步都能说出理由，你理解他、甚至会替他开脱，直到最后才发现自己站错了边（L/D混合）", scores: { L: 0.5, D: 0.5 } },
+                    { label: "SKIP", text: "无所谓，主要看故事好不好看", scores: {} }
+                ],
+                reason: "文案更有力直白"
+            },
+            36: {
+                type: 'option',
+                optionIndex: 0,
+                original: "好导演可以用暗示和留白传达同样的力量——不一定要直接呈现",
+                suggested: "暴力应该有分寸——太直接的呈现会显得廉价，好导演通过暗示传达恐惧就足够了",
+                reason: "原文测的是美学理念偏A维度"
+            },
+            40: {
+                type: 'full_redesign',
+                title: '重新设计',
+                newQuestion: "以儿童视角讲故事的电影，你更被哪种吸引？",
+                newOptions: [
+                    { label: "A", text: "儿童世界的魔法感——简单的快乐、天真的冒险、成人早已遗忘的奇迹感（L）", scores: { L: 1 } },
+                    { label: "B", text: "儿童眼中的真相——大人世界的残酷、谎言和虚伪，通过孩子的视角无所遁形（D）", scores: { D: 1 } },
+                    { label: "C", text: "儿童的成长代价——天真在现实中一点点碎裂的过程，既有温情也有痛感（L/D混合）", scores: { L: 0.5, D: 0.5 } },
+                    { label: "SKIP", text: "不太看这类题材的电影", scores: {} }
+                ],
+                reason: "表述更直观"
+            },
+            43: {
+                type: 'full_redesign',
+                title: '全新设计',
+                newQuestion: "如果有人问你'最近在看什么电影'，你最常见的回答是：",
+                newOptions: [
+                    { label: "A", text: "'在补某个导演的作品，想把他的风格摸透，比如最近在看贾樟柯的所有电影。'（S）", scores: { S: 1 } },
+                    { label: "B", text: "'没什么特定目标，就是什么好看看什么。最近看了好几部完全不同的。'（X）", scores: { X: 1 } },
+                    { label: "C", text: "'我在追一个话题/美学方向。比如最近对'都市孤独感'这个主题特别感兴趣，所以在找各种表现这个主题的电影。'（S）", scores: { S: 1 } },
+                    { label: "D", text: "'看我心情吧。想看剧情就看剧情，想看爽片就看爽片。'（X）", scores: { X: 1 } }
+                ],
+                reason: "从观影意图陈述切入测X/S"
+            },
+            44: {
+                type: 'reconstruct',
+                title: '整题重构',
+                reason: '实际测性别审美偏好而非X/S对立'
+            },
+            47: {
+                type: 'option',
+                optionIndex: 0,
+                original: "硬科幻才是正道——《火星救援》的种土豆必须有化学依据，《三体》的物理设定必须经得起推敲",
+                suggested: "硬科幻才是正道——《火星救援》的种土豆必须有化学依据，科学设定经得起推敲，这才配叫神作",
+                reason: "删除《三体》（非电影），仅保留《火星救援》"
+            },
+            48: {
+                type: 'full_redesign',
+                title: '改为态度选择题',
+                newQuestion: "面对'争议电影'（因尺度、观点、题材而引发争议的作品），你的态度是？",
+                newOptions: [
+                    { label: "A", text: "被禁就看——越被争议、越被审查，越说明它碰到了什么真实的东西。这种电影往往比安全的艺术作品更有价值（D）", scores: { D: 1 } },
+                    { label: "B", text: "有意思就看——不为了'禁'这个标签而看，但如果听说内容有意思，也愿意试试（D弱）", scores: { D: 0.5 } },
+                    { label: "C", text: "尽量回避——极端的内容和冒犯性的表达，我不认为那就是艺术。温和的批判往往更有力量（L）", scores: { L: 1 } },
+                    { label: "D", text: "无所谓——我看电影看的是故事和情感，不太在乎电影涉不涉及争议（中性）", scores: {} },
+                    { label: "SKIP", text: "不看这类题材", scores: {} }
+                ],
+                reason: "从选电影改为测态度，更直接区分L/D"
+            }
+        };
+
+        // State
+        let currentIndex = 0;
+        let reviewStatus = {}; // { questionId: { status: 'approved'|'adopted'|'custom', notes: '', customData: {} } }
+        let expertScores = {}; // { questionId: { film: number, psych: number } }
+        let currentFilter = 'all'; // 'all'|'high'|'medium'|'low'|'unscored'
+        let userSuggestions = {}; // { questionId: "用户输入的修改建议" }
+
+        // Initialize
+        function init() {
+            loadFromStorage();
+            renderNav();
+            renderQuestion();
+            updateStats();
+        }
+
+        // Load from localStorage
+        function loadFromStorage() {
+            const saved = localStorage.getItem('fbti_review_status');
+            if (saved) {
+                reviewStatus = JSON.parse(saved);
+            }
+            const savedScores = localStorage.getItem('fbti_expert_scores');
+            if (savedScores) {
+                expertScores = JSON.parse(savedScores);
+            }
+            const savedSuggestions = localStorage.getItem('fbti_user_suggestions');
+            if (savedSuggestions) {
+                userSuggestions = JSON.parse(savedSuggestions);
+            }
+        }
+
+        // Get average score for a question
+        function getAverageScore(questionId) {
+            const film = filmExpertScores[questionId]?.score;
+            const psych = psychExpertScores[questionId]?.score;
+            if (film !== undefined && psych !== undefined) {
+                return Math.round((film + psych) / 2 * 10) / 10;
+            }
+            return null;
+        }
+
+        // Get score level
+        function getScoreLevel(avgScore) {
+            if (avgScore === null) return 'unscored';
+            if (avgScore >= 8) return 'high';
+            if (avgScore >= 5) return 'medium';
+            return 'low';
+        }
+
+        // Get score color class
+        function getScoreColorClass(avgScore) {
+            const level = getScoreLevel(avgScore);
+            if (level === 'high') return 'score-high';
+            if (level === 'medium') return 'score-medium';
+            if (level === 'low') return 'score-low';
+            return '';
+        }
+
+        // Save to localStorage
+        function saveToStorage() {
+            localStorage.setItem('fbti_review_status', JSON.stringify(reviewStatus));
+            localStorage.setItem('fbti_expert_scores', JSON.stringify(expertScores));
+            localStorage.setItem('fbti_user_suggestions', JSON.stringify(userSuggestions));
+        }
+
+        // Save user suggestion for current question
+        function saveUserSuggestion() {
+            const q = questionsData[currentIndex];
+            const suggestionText = document.getElementById('reviewNotes').value.trim();
+            if (suggestionText) {
+                userSuggestions[q.id] = suggestionText;
+            } else {
+                delete userSuggestions[q.id];
+            }
+            saveToStorage();
+            renderNav();
+        }
+
+        // Update expert score
+        function updateExpertScore(type, value) {
+            const q = questionsData[currentIndex];
+            if (!expertScores[q.id]) {
+                expertScores[q.id] = {};
+            }
+            const numValue = parseInt(value);
+            if (numValue >= 1 && numValue <= 10) {
+                expertScores[q.id][type] = numValue;
+                saveToStorage();
+                renderExpertScores();
+                renderNav();
+                updateStats();
+            }
+        }
+
+        // Render expert scores
+        function renderExpertScores() {
+            const q = questionsData[currentIndex];
+            const filmScore = filmExpertScores[q.id]?.score || expertScores[q.id]?.film || '';
+            const psychScore = psychExpertScores[q.id]?.score || expertScores[q.id]?.psych || '';
+            const avgScore = getAverageScore(q.id);
+
+            document.getElementById('scoreFilm').value = filmScore;
+            document.getElementById('scorePsych').value = psychScore;
+
+            const avgEl = document.getElementById('scoreAvg');
+            if (avgScore !== null) {
+                avgEl.textContent = avgScore.toFixed(1);
+                avgEl.className = 'score-value ' + getScoreColorClass(avgScore);
+            } else {
+                avgEl.textContent = '-';
+                avgEl.className = 'score-value';
+            }
+
+            // Add tooltips with reasons
+            const filmInput = document.getElementById('scoreFilm');
+            const psychInput = document.getElementById('scorePsych');
+
+            if (filmExpertScores[q.id]) {
+                filmInput.title = `电影专家评分: ${filmExpertScores[q.id].score}\n理由: ${filmExpertScores[q.id].reason}`;
+            }
+            if (psychExpertScores[q.id]) {
+                psychInput.title = `心理学专家评分: ${psychExpertScores[q.id].score}\n理由: ${psychExpertScores[q.id].reason}`;
+            }
+        }
+
+        // Set filter
+        function setFilter(filter) {
+            currentFilter = filter;
+
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`filter-${filter}`).classList.add('active');
+
+            renderNav();
+
+            // Navigate to first visible question
+            const visibleQuestions = getFilteredQuestions();
+            if (visibleQuestions.length > 0) {
+                currentIndex = questionsData.indexOf(visibleQuestions[0]);
+                renderQuestion();
+            }
+        }
+
+        // Get filtered questions
+        function getFilteredQuestions() {
+            if (currentFilter === 'all') return questionsData;
+
+            return questionsData.filter(q => {
+                const avgScore = getAverageScore(q.id);
+                const level = getScoreLevel(avgScore);
+                return level === currentFilter;
+            });
+        }
+
+        // Render Navigation
+        function renderNav() {
+            const nav = document.getElementById('navThumbnails');
+            const filteredQuestions = getFilteredQuestions();
+            const filteredIds = new Set(filteredQuestions.map(q => q.id));
+
+            nav.innerHTML = questionsData.map((q, idx) => {
+                const status = reviewStatus[q.id]?.status;
+                const avgScore = getAverageScore(q.id);
+                const scoreLevel = getScoreLevel(avgScore);
+
+                // Check if this question should be visible
+                const isVisible = filteredIds.has(q.id);
+
+                let className = 'nav-item ';
+                if (idx === currentIndex) className += 'active ';
+
+                // Apply status-based color (user review status takes priority)
+                if (status === 'approved') {
+                    className += 'approved ';
+                } else if (status === 'adopted' || status === 'custom') {
+                    className += 'suggested ';
+                } else {
+                    // Apply score-based color if no user review status
+                    if (scoreLevel === 'high') {
+                        className += 'approved ';
+                    } else if (scoreLevel === 'medium') {
+                        className += 'suggested ';
+                    } else if (scoreLevel === 'low') {
+                        className += 'critical ';
+                    } else {
+                        className += 'pending ';
+                    }
+                }
+
+                // Add suggestion indicator
+                if (suggestionsData[q.id] && suggestionsData[q.id].type === 'reconstruct') {
+                    className += 'has-reconstruct ';
+                }
+
+                const opacity = isVisible ? '1' : '0.2';
+                const pointerEvents = isVisible ? 'auto' : 'none';
+
+                const tooltip = `Q${q.id} (${q.primaryDimension})${avgScore !== null ? ` - 综合评分: ${avgScore.toFixed(1)}` : ''}${userSuggestions[q.id] ? ' [已写修改建议]' : ''}`;
+
+                const suggestionDot = userSuggestions[q.id] ? '<div class="suggestion-dot"></div>' : '';
+
+                return `<div class="${className}" onclick="goToQuestion(${idx})" title="${tooltip}" style="opacity: ${opacity}; pointer-events: ${pointerEvents};">Q${q.id}${suggestionDot}</div>`;
+            }).join('');
+        }
+
+        // Render Question
+        function renderQuestion() {
+            const q = questionsData[currentIndex];
+            const status = reviewStatus[q.id];
+            const suggestion = suggestionsData[q.id];
+            const avgScore = getAverageScore(q.id);
+
+            // Update badges
+            document.getElementById('dimensionBadge').textContent = q.primaryDimension;
+            document.getElementById('typeBadge').textContent = q.questionType;
+
+            // Update status badge based on score level
+            const statusBadge = document.getElementById('currentStatus');
+            const scoreLevel = getScoreLevel(avgScore);
+
+            if (status?.status === 'approved') {
+                statusBadge.textContent = '已通过';
+                statusBadge.style.background = 'rgba(34, 197, 94, 0.2)';
+                statusBadge.style.color = 'var(--success)';
+            } else if (status?.status === 'adopted') {
+                statusBadge.textContent = '已采纳建议';
+                statusBadge.style.background = 'rgba(234, 179, 8, 0.2)';
+                statusBadge.style.color = 'var(--warning)';
+            } else if (status?.status === 'custom') {
+                statusBadge.textContent = '已自定义';
+                statusBadge.style.background = 'rgba(59, 130, 246, 0.2)';
+                statusBadge.style.color = 'var(--accent-primary)';
+            } else {
+                // Show score-based status
+                if (scoreLevel === 'high') {
+                    statusBadge.textContent = '保留';
+                    statusBadge.style.background = 'rgba(34, 197, 94, 0.2)';
+                    statusBadge.style.color = 'var(--success)';
+                } else if (scoreLevel === 'medium') {
+                    statusBadge.textContent = '优化';
+                    statusBadge.style.background = 'rgba(234, 179, 8, 0.2)';
+                    statusBadge.style.color = 'var(--warning)';
+                } else if (scoreLevel === 'low') {
+                    statusBadge.textContent = '汰换';
+                    statusBadge.style.background = 'rgba(239, 68, 68, 0.2)';
+                    statusBadge.style.color = 'var(--danger)';
+                } else {
+                    statusBadge.textContent = suggestion ? (suggestion.type === 'reconstruct' ? '需重构' : '有建议') : '未审阅';
+                    statusBadge.style.background = suggestion ? (suggestion.type === 'reconstruct' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(234, 179, 8, 0.2)') : 'rgba(6, 182, 212, 0.2)';
+                    statusBadge.style.color = suggestion ? (suggestion.type === 'reconstruct' ? 'var(--danger)' : 'var(--warning)') : 'var(--info)';
+                }
+            }
+
+            // Render expert scores
+            renderExpertScores();
+
+            // Question text
+            document.getElementById('questionText').textContent = q.text;
+
+            // Options
+            const optionsList = document.getElementById('optionsList');
+            optionsList.innerHTML = q.options.map((opt, idx) => {
+                const isHighlighted = suggestion && suggestion.type === 'option' && suggestion.optionIndex === idx;
+                const scoresText = Object.entries(opt.scores).map(([k, v]) => `${k}:${v}`).join(', ') || '无';
+                return `
+                    <div class="option-item ${isHighlighted ? 'highlight-change' : ''}">
+                        <div class="option-label">选项 ${opt.label}</div>
+                        <div class="option-text">${opt.text}</div>
+                        <div class="option-scores">计分: ${scoresText}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Suggestions panel
+            const suggestionPanel = document.getElementById('suggestionPanel');
+            if (suggestion) {
+                if (suggestion.type === 'reconstruct') {
+                    suggestionPanel.innerHTML = `
+                        <div class="alert alert-danger">
+                            <strong>⚠️ ${suggestion.title}</strong>
+                            <p style="margin-top: 0.5rem; margin-bottom: 0;">${suggestion.reason}</p>
+                        </div>
+                    `;
+                } else if (suggestion.type === 'full_redesign') {
+                    let optionsHtml = suggestion.newOptions.map(opt => `
+                        <div class="option-item" style="margin-bottom: 0.5rem;">
+                            <div class="option-label">选项 ${opt.label}</div>
+                            <div class="option-text">${opt.text}</div>
+                            <div class="option-scores">计分: ${Object.entries(opt.scores).map(([k, v]) => `${k}:${v}`).join(', ') || '无'}</div>
+                        </div>
+                    `).join('');
+                    suggestionPanel.innerHTML = `
+                        <div class="suggestion-box">
+                            <div class="suggestion-title">📝 ${suggestion.title}</div>
+                            <div class="suggestion-content">
+                                <div style="margin-bottom: 0.75rem;">
+                                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">新题目：</div>
+                                    <div style="font-weight: 600; margin-bottom: 1rem;">${suggestion.newQuestion}</div>
+                                </div>
+                                <div>
+                                    <div style="color: var(--success); font-size: 0.875rem; margin-bottom: 0.5rem;">新选项列表：</div>
+                                    ${optionsHtml}
+                                </div>
+                            </div>
+                            <div class="suggestion-reason">
+                                <strong>原因：</strong>${suggestion.reason}
+                            </div>
+                        </div>
+                    `;
+                } else if (suggestion.type === 'add_options') {
+                    let addedOptionsHtml = suggestion.addedOptions.map(opt => `
+                        <div class="option-item" style="margin-bottom: 0.5rem; border-color: var(--success);">
+                            <div class="option-label">新增选项 ${opt.label}</div>
+                            <div class="option-text">${opt.text}</div>
+                            <div class="option-scores">计分: ${Object.entries(opt.scores).map(([k, v]) => `${k}:${v}`).join(', ') || '无'}</div>
+                        </div>
+                    `).join('');
+                    suggestionPanel.innerHTML = `
+                        <div class="suggestion-box">
+                            <div class="suggestion-title">➕ ${suggestion.title}</div>
+                            <div class="suggestion-content">
+                                <div style="color: var(--success); font-size: 0.875rem; margin-bottom: 0.5rem;">新增选项：</div>
+                                ${addedOptionsHtml}
+                            </div>
+                            <div class="suggestion-reason">
+                                <strong>原因：</strong>${suggestion.reason}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const originalOption = q.options[suggestion.optionIndex];
+                    suggestionPanel.innerHTML = `
+                        <div class="suggestion-box">
+                            <div class="suggestion-title">💡 建议修改选项 ${originalOption.label}</div>
+                            <div class="suggestion-content">
+                                <div style="margin-bottom: 0.75rem;">
+                                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">原内容：</div>
+                                    <div style="text-decoration: line-through; opacity: 0.7;">${suggestion.original}</div>
+                                </div>
+                                <div>
+                                    <div style="color: var(--success); font-size: 0.875rem; margin-bottom: 0.25rem;">建议改为：</div>
+                                    <div style="color: var(--success);">${suggestion.suggested}</div>
+                                </div>
+                            </div>
+                            <div class="suggestion-reason">
+                                <strong>原因：</strong>${suggestion.reason}
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                suggestionPanel.innerHTML = `
+                    <div class="no-suggestion">
+                        <div class="no-suggestion-icon">✅</div>
+                        <div>本题暂无修改建议</div>
+                    </div>
+                `;
+            }
+
+            // Update adopt button - enable for all suggestion types except reconstruct
+            document.getElementById('adoptBtn').disabled = !suggestion || suggestion.type === 'reconstruct';
+
+            // Load notes
+            document.getElementById('reviewNotes').value = userSuggestions[q.id] || '';
+
+            // Add input listener to auto-save suggestions
+            document.getElementById('reviewNotes').oninput = saveUserSuggestion;
+
+            // Update nav
+            renderNav();
+        }
+
+        // Navigate to question
+        function goToQuestion(index) {
+            currentIndex = index;
+            renderQuestion();
+        }
+
+        // Navigate previous/next
+        function navigateQuestion(delta) {
+            const newIndex = currentIndex + delta;
+            if (newIndex >= 0 && newIndex < questionsData.length) {
+                currentIndex = newIndex;
+                renderQuestion();
+            }
+        }
+
+        // Review action
+        function reviewAction(action) {
+            const q = questionsData[currentIndex];
+            const suggestion = suggestionsData[q.id];
+            
+            if (action === 'approved') {
+                reviewStatus[q.id] = {
+                    status: 'approved',
+                    notes: document.getElementById('reviewNotes').value,
+                    timestamp: Date.now()
+                };
+                saveToStorage();
+                renderNav();
+                renderQuestion();
+                updateStats();
+                showAlert('success', '✓ 已通过：题目保持原样');
+            } else if (action === 'adopt') {
+                if (suggestion && (suggestion.type === 'option' || suggestion.type === 'full_redesign' || suggestion.type === 'add_options')) {
+                    reviewStatus[q.id] = {
+                        status: 'adopted',
+                        notes: document.getElementById('reviewNotes').value,
+                        suggestion: suggestion,
+                        timestamp: Date.now()
+                    };
+                    saveToStorage();
+                    renderNav();
+                    renderQuestion();
+                    updateStats();
+                    showAlert('success', '✓ 已采纳建议：' + (suggestion.type === 'full_redesign' ? '题目已重新设计' : suggestion.type === 'add_options' ? '选项已增加' : '选项已更新'));
+                } else {
+                    showAlert('warning', '本题没有可采纳的建议');
+                }
+            }
+        }
+
+        // Open custom edit modal
+        function openCustomEdit() {
+            const q = questionsData[currentIndex];
+            const modalBody = document.getElementById('editModalBody');
+            
+            modalBody.innerHTML = `
+                <div class="edit-form-group">
+                    <label class="edit-label">题目文本</label>
+                    <textarea class="edit-textarea" id="editQuestionText">${q.text}</textarea>
+                </div>
+                ${q.options.map((opt, idx) => `
+                    <div class="option-edit">
+                        <div class="option-edit-header">选项 ${opt.label}</div>
+                        <div class="edit-form-group">
+                            <label class="edit-label">选项文本</label>
+                            <textarea class="edit-textarea" id="editOption${idx}">${opt.text}</textarea>
+                        </div>
+                        <div class="edit-form-group">
+                            <label class="edit-label">计分 (格式: E:1,A:0.5)</label>
+                            <input type="text" class="edit-input" id="editScores${idx}" value="${Object.entries(opt.scores).map(([k,v]) => `${k}:${v}`).join(',')}">
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+            
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        // Save custom edit
+        function saveCustomEdit() {
+            const q = questionsData[currentIndex];
+            const customData = {
+                text: document.getElementById('editQuestionText').value,
+                options: q.options.map((opt, idx) => ({
+                    label: opt.label,
+                    text: document.getElementById(`editOption${idx}`).value,
+                    scores: parseScores(document.getElementById(`editScores${idx}`).value)
+                }))
+            };
+            
+            reviewStatus[q.id] = {
+                status: 'custom',
+                notes: document.getElementById('reviewNotes').value,
+                customData: customData,
+                timestamp: Date.now()
+            };
+            
+            saveToStorage();
+            closeModal();
+            renderQuestion();
+            updateStats();
+            showAlert('success', '已保存自定义修改');
+        }
+
+        // Parse scores string
+        function parseScores(str) {
+            const scores = {};
+            str.split(/[,，]/).forEach(part => {
+                const [k, v] = part.trim().split(':');
+                if (k && v) scores[k.trim()] = parseFloat(v.trim());
+            });
+            return scores;
+        }
+
+        // Show alert
+        function showAlert(type, message) {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            container.innerHTML = '';
+            container.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+
+        // Export suggestions
+        function exportSuggestions() {
+            const suggestions = [];
+            
+            Object.entries(userSuggestions).forEach(([questionId, suggestion]) => {
+                if (suggestion.trim()) {
+                    const q = questionsData.find(q => q.id === parseInt(questionId));
+                    if (q) {
+                        suggestions.push({
+                            id: q.id,
+                            dimension: q.primaryDimension,
+                            originalText: q.text,
+                            suggestion: suggestion
+                        });
+                    }
+                }
+            });
+            
+            // Sort by id
+            suggestions.sort((a, b) => a.id - b.id);
+            
+            const jsonStr = JSON.stringify(suggestions, null, 2);
+            document.getElementById('exportJson').textContent = jsonStr;
+            document.getElementById('exportModal').classList.add('active');
+        }
+
+        // Close export modal
+        function closeExportModal() {
+            document.getElementById('exportModal').classList.remove('active');
+        }
+
+        // Copy to clipboard
+        function copyToClipboard() {
+            const jsonText = document.getElementById('exportJson').textContent;
+            navigator.clipboard.writeText(jsonText).then(() => {
+                showAlert('success', '已复制到剪贴板');
+            }).catch(err => {
+                showAlert('danger', '复制失败，请手动复制');
+            });
+        }
+
+        // Update stats
+        function updateStats() {
+            const total = questionsData.length;
+            let approvedCount = 0, adoptedCount = 0, customCount = 0, pendingCount = 0;
+
+            questionsData.forEach(q => {
+                const status = reviewStatus[q.id]?.status;
+                if (status === 'approved') {
+                    approvedCount++;
+                } else if (status === 'adopted') {
+                    adoptedCount++;
+                } else if (status === 'custom') {
+                    customCount++;
+                } else {
+                    pendingCount++;
+                }
+            });
+
+            // Update review status stats
+            document.getElementById('statApproved').textContent = approvedCount;
+            document.getElementById('statApproved').className = 'stat-value stat-approved';
+            document.getElementById('statApproved').nextElementSibling.textContent = '已通过';
+
+            document.getElementById('statPending').textContent = pendingCount;
+            document.getElementById('statPending').className = 'stat-value stat-pending';
+            document.getElementById('statPending').nextElementSibling.textContent = '待审阅';
+
+            document.getElementById('statSuggested').textContent = adoptedCount;
+            document.getElementById('statSuggested').className = 'stat-value stat-suggested';
+            document.getElementById('statSuggested').nextElementSibling.textContent = '已采纳建议';
+
+            document.getElementById('statCritical').textContent = customCount;
+            document.getElementById('statCritical').className = 'stat-value stat-critical';
+            document.getElementById('statCritical').style.color = '';
+            document.getElementById('statCritical').nextElementSibling.textContent = '自定义修改';
+
+            // Dimension stats with score breakdown
+            const dimensionCount = {};
+            questionsData.forEach(q => {
+                const dim = q.primaryDimension;
+                if (!dimensionCount[dim]) {
+                    dimensionCount[dim] = { total: 0, high: 0, medium: 0, low: 0 };
+                }
+                dimensionCount[dim].total++;
+
+                const avgScore = getAverageScore(q.id);
+                const level = getScoreLevel(avgScore);
+                if (level === 'high') dimensionCount[dim].high++;
+                else if (level === 'medium') dimensionCount[dim].medium++;
+                else if (level === 'low') dimensionCount[dim].low++;
+            });
+
+            document.getElementById('dimensionStats').innerHTML = Object.entries(dimensionCount)
+                .map(([dim, counts]) => {
+                    const highPercent = Math.round(counts.high / counts.total * 100);
+                    const mediumPercent = Math.round(counts.medium / counts.total * 100);
+                    const lowPercent = Math.round(counts.low / counts.total * 100);
+                    return `<div class="dimension-badge" title="保留${counts.high}道 | 优化${counts.medium}道 | 汰换${counts.low}道">${dim} <span>${counts.total}题 (保${highPercent}%|优${medium}%|汰${lowPercent}%)</span></div>`;
+                })
+                .join('');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('editModal').classList.contains('active')) return;
+            
+            if (e.key === 'ArrowLeft') navigateQuestion(-1);
+            if (e.key === 'ArrowRight') navigateQuestion(1);
+            if (e.key === '1') reviewAction('approved');
+            if (e.key === '2' && !document.getElementById('adoptBtn').disabled) reviewAction('adopt');
+            if (e.key === '3') openCustomEdit();
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

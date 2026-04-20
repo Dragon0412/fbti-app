@@ -50,9 +50,18 @@ const movieTitleMap = {
   "发条橙": "A Clockwork Orange",
   "颐和园": "Summer Palace",
   "索多玛120天": "Salò, or the 120 Days of Sodom",
+  "徒手攀岩": "Free Solo",
+  "闪灵": "The Shining",
+  "摩登时代": "Modern Times",
+  "信条": "Tenet",
+  "荒野生存": "Into the Wild",
+  "疯狂的麦克斯：狂暴之路": "Mad Max: Fury Road",
+  "触不可及": "The Intouchables",
+  "龙虾": "The Lobster",
+  "V字仇杀队": "V for Vendetta",
 };
 
-// 电影列表（34部）
+// 电影列表（43部）
 const movies = [
   { title: "星际穿越", year: 2014 },
   { title: "坠落的审判", year: 2023 },
@@ -89,6 +98,15 @@ const movies = [
   { title: "发条橙", year: 1971 },
   { title: "颐和园", year: 2006 },
   { title: "索多玛120天", year: 1975 },
+  { title: "徒手攀岩", year: 2018 },
+  { title: "闪灵", year: 1980 },
+  { title: "摩登时代", year: 1936 },
+  { title: "信条", year: 2020 },
+  { title: "荒野生存", year: 2007 },
+  { title: "疯狂的麦克斯：狂暴之路", year: 2015 },
+  { title: "触不可及", year: 2011 },
+  { title: "龙虾", year: 2015 },
+  { title: "V字仇杀队", year: 2005 },
 ];
 
 // 生成 slug（小写英文，空格和特殊字符转为连字符）

@@ -52,6 +52,75 @@ const RARITY_COLORS: Record<string, string> = {
 
 const RARITY_ORDER = ["common", "uncommon", "rare", "legendary"];
 
+// Hidden attribute thresholds & labels for progress bars
+const HIDDEN_THRESHOLDS: Record<string, { thresholds: number[]; labels: string[] }> = {
+  alpha: {
+    thresholds: [2, 4, 6],
+    labels: ["影院漫步者", "十年藏家", "影史漫游者", "时间旅人"],
+  },
+  beta: {
+    thresholds: [3, 7, 12],
+    labels: ["故事优先", "氛围捕手", "感官猎人", "影像魔法师"],
+  },
+  gamma: {
+    thresholds: [2, 4, 6],
+    labels: ["本土影迷", "邻国通", "世界公民", "无国界影人"],
+  },
+};
+
+const RARITY_BAR_COLORS: Record<string, { bar: string; bg: string }> = {
+  common: { bar: "bg-gray-500", bg: "bg-gray-800" },
+  uncommon: { bar: "bg-green-500", bg: "bg-green-900/30" },
+  rare: { bar: "bg-blue-500", bg: "bg-blue-900/30" },
+  legendary: { bar: "bg-amber-500", bg: "bg-amber-900/30" },
+};
+
+function getNextLevel(attrKey: string, score: number): { nextLabel: string; nextRarity: string; needed: number } | null {
+  const meta = HIDDEN_THRESHOLDS[attrKey];
+  if (!meta) return null;
+  const { thresholds, labels } = meta;
+  const rarities = ["uncommon", "rare", "legendary"];
+  for (let i = 0; i < thresholds.length; i++) {
+    if (score <= thresholds[i]) {
+      return { nextLabel: labels[i + 1], nextRarity: rarities[i], needed: thresholds[i] - score + 1 };
+    }
+  }
+  return null; // already max
+}
+
+function getProgressFraction(attrKey: string, score: number): { current: number; max: number } {
+  const meta = HIDDEN_THRESHOLDS[attrKey];
+  if (!meta) return { current: 0, max: 1 };
+  const maxThreshold = meta.thresholds[meta.thresholds.length - 1];
+  return { current: Math.min(score, maxThreshold + 1), max: maxThreshold + 1 };
+}
+
+// Genre shape analysis
+const GENRE_LABEL_MAP: Record<string, string> = {
+  horror: "幽谷·恐怖", comedy: "浮生·喜剧", scifi: "异境·科幻",
+  crime: "暗局·犯罪", romance: "情澜·爱情", action: "烈风·动作",
+};
+
+function analyzeGeneShape(delta: Record<string, number>): { tag: string; description: string } {
+  const scores = Object.values(delta);
+  if (scores.length === 0) return { tag: "全能影迷", description: "" };
+  const max = Math.max(...scores);
+  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+  const variance = scores.reduce((a, b) => a + (b - avg) ** 2, 0) / scores.length;
+
+  if (variance < 1.5) {
+    return { tag: "全能影迷型", description: "你的类型基因分布均匀，几乎各种类型都能欣赏——这是最高级的电影修养表现。" };
+  } else if (max > avg * 2) {
+    const topKey = Object.entries(delta).sort((a, b) => b[1] - a[1])[0][0];
+    const topName = GENRE_LABEL_MAP[topKey] || topKey;
+    return { tag: "类型专家型", description: `你在「${topName}」维度上有极强的偏好，是这个类型的深度爱好者。` };
+  } else {
+    const sorted = Object.entries(delta).sort((a, b) => b[1] - a[1]);
+    const top2 = sorted.slice(0, 2).map(([k]) => GENRE_LABEL_MAP[k] || k);
+    return { tag: "混搭型", description: `你的类型偏好集中在「${top2[0]}」和「${top2[1]}」，这是一个有趣的品味组合。` };
+  }
+}
+
 const CODE_MEANINGS: Record<string, string> = {
   E: "Empathy · 共情",
   A: "Analytical · 解析",
@@ -72,6 +141,8 @@ export default function ResultPage() {
   const [isTearing, setIsTearing] = useState(false); // 撕票动画中
   const [generating, setGenerating] = useState(false);
   const [showCard, setShowCard] = useState(false);
+  const [expandDirectors, setExpandDirectors] = useState(false);
+  const [expandFilms, setExpandFilms] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
@@ -122,6 +193,7 @@ export default function ResultPage() {
   };
 
   const typeData = result ? personalityTypes[result.type] : null;
+  const geneShape = result ? analyzeGeneShape(result.hidden.delta) : null;
 
   const handleShare = useCallback(async () => {
     setGenerating(true);
@@ -491,7 +563,7 @@ export default function ResultPage() {
           <div className="mb-3">
             <p className="text-xs text-gray-500 mb-1.5">代表导演</p>
             <div className="flex flex-wrap gap-1.5">
-              {result.topDirectors.map((d) => (
+              {(expandDirectors ? result.topDirectors : result.topDirectors.slice(0, 5)).map((d) => (
                 <a
                   key={d}
                   href={`https://www.themoviedb.org/search/person?query=${encodeURIComponent(d)}`}
@@ -502,12 +574,20 @@ export default function ResultPage() {
                   {d}
                 </a>
               ))}
+              {result.topDirectors.length > 5 && (
+                <button
+                  onClick={() => setExpandDirectors(!expandDirectors)}
+                  className="px-2.5 py-1 rounded-full text-xs text-amber-400/70 hover:text-amber-400 transition-colors"
+                >
+                  {expandDirectors ? "收起" : `+${result.topDirectors.length - 5} 更多`}
+                </button>
+              )}
             </div>
           </div>
           <div>
             <p className="text-xs text-gray-500 mb-1.5">代表作品</p>
             <div className="flex flex-wrap gap-1.5">
-              {result.topFilms.map((f) => (
+              {(expandFilms ? result.topFilms : result.topFilms.slice(0, 5)).map((f) => (
                 <a
                   key={f}
                   href={`https://www.themoviedb.org/search/movie?query=${encodeURIComponent(f)}`}
@@ -518,6 +598,14 @@ export default function ResultPage() {
                   {f}
                 </a>
               ))}
+              {result.topFilms.length > 5 && (
+                <button
+                  onClick={() => setExpandFilms(!expandFilms)}
+                  className="px-2.5 py-1 rounded-full text-xs text-amber-400/70 hover:text-amber-400 transition-colors"
+                >
+                  {expandFilms ? "收起" : `+${result.topFilms.length - 5} 更多`}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -538,6 +626,7 @@ export default function ResultPage() {
           <div className="grid grid-cols-3 gap-3 items-stretch">
             <HiddenAttrCard
               icon="α"
+              attrKey="alpha"
               name="时间穿越者"
               rarity={result.hidden.alpha.rarity}
               label={result.hidden.alpha.label}
@@ -545,6 +634,7 @@ export default function ResultPage() {
             />
             <HiddenAttrCard
               icon="β"
+              attrKey="beta"
               name="形式感应器"
               rarity={result.hidden.beta.rarity}
               label={result.hidden.beta.label}
@@ -552,6 +642,7 @@ export default function ResultPage() {
             />
             <HiddenAttrCard
               icon="γ"
+              attrKey="gamma"
               name="文化通行证"
               rarity={result.hidden.gamma.rarity}
               label={result.hidden.gamma.label}
@@ -566,6 +657,13 @@ export default function ResultPage() {
             类型基因
           </h3>
           <DeltaRadarChart delta={result.hidden.delta} />
+          {geneShape && (
+            <p className="text-center text-xs text-gray-400 italic mt-3">
+              <span className="text-amber-400/80 not-italic font-medium">{geneShape.tag}</span>
+              <span className="mx-1">·</span>
+              {geneShape.description}
+            </p>
+          )}
         </div>
 
         {/* Viewing Profile */}
@@ -886,6 +984,8 @@ function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typ
   const gray400 = "#b0b8c4";
   const gray500 = "#8b95a5";
 
+  const geneShape = analyzeGeneShape(result.hidden.delta);
+
   const RARITY_ORDER = ["common", "uncommon", "rare", "legendary"];
 
   // Collect all attributes with rare or legendary rarity for badge display
@@ -922,8 +1022,8 @@ function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typ
     { key: "comedy", label: "浮生", reveal: "喜剧", color: "#fbbf24" },
     { key: "scifi", label: "异境", reveal: "科幻", color: "#06b6d4" },
     { key: "crime", label: "暗局", reveal: "犯罪", color: "#dc2626" },
-    { key: "animation", label: "织梦", reveal: "动画", color: "#f472b6" },
-    { key: "documentary", label: "拾真", reveal: "纪录片", color: "#10b981" },
+    { key: "romance", label: "情澜", reveal: "爱情/言情", color: "#ff6b9d" },
+    { key: "action", label: "烈风", reveal: "动作/冒险", color: "#ff4500" },
   ];
   const delta = result.hidden.delta;
   const maxVal = Math.max(...Object.values(delta), 1);
@@ -1208,6 +1308,12 @@ function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typ
             })}
           </svg>
         </div>
+        {/* Gene shape tag */}
+        <div style={{ textAlign: "center", fontSize: 13, color: gray500, fontStyle: "italic", marginTop: 8, paddingBottom: 4 }}>
+          <span style={{ color: amber, fontStyle: "normal", fontWeight: 600 }}>{geneShape.tag}</span>
+          <span style={{ margin: "0 4px" }}>·</span>
+          {geneShape.description}
+        </div>
       </div>
 
       {/* Viewing Profile */}
@@ -1268,12 +1374,14 @@ function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typ
 
 function HiddenAttrCard({
   icon,
+  attrKey,
   name,
   rarity,
   label,
   score,
 }: {
   icon: string;
+  attrKey: string;
   name: string;
   rarity: string;
   label: string;
@@ -1281,21 +1389,51 @@ function HiddenAttrCard({
 }) {
   const colorClass = RARITY_COLORS[rarity] ?? RARITY_COLORS.common;
   const attrClass = icon === 'α' ? 'attr-alpha-icon' : icon === 'β' ? 'attr-beta-icon' : 'attr-gamma-icon';
-  
+  const barColors = RARITY_BAR_COLORS[rarity] ?? RARITY_BAR_COLORS.common;
+  const progress = getProgressFraction(attrKey, score);
+  const pct = Math.round((progress.current / progress.max) * 100);
+  const next = getNextLevel(attrKey, score);
+  const RARITY_LABEL_CN: Record<string, string> = { uncommon: "罕见", rare: "稀有", legendary: "传说" };
+
   return (
     <div className="bg-[#222845] rounded-xl p-3 border border-gray-800 hover:border-gray-700 transition-all flex flex-col items-center justify-between h-full">
       {/* 图标区域 - 顶部 */}
-      <div className={`text-3xl ${attrClass} flex items-center justify-center w-full`} style={{ minHeight: '48px', padding: '8px 0' }}>
+      <div className={`text-2xl ${attrClass} flex items-center justify-center w-full`} style={{ minHeight: '36px', padding: '4px 0' }}>
         {icon}
       </div>
       
-      {/* 名称 - 中间 */}
-      <p className="text-xs text-gray-300 text-center leading-tight my-1">{name}</p>
+      {/* 名称 */}
+      <p className="text-[10px] text-gray-300 text-center leading-tight my-0.5">{name}</p>
       
-      {/* 标签 - 底部胶囊色块 */}
-      <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${colorClass}`}>
+      {/* 标签 - 胶团色块 */}
+      <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium ${colorClass}`}>
         {label}
       </span>
+
+      {/* 进度条 */}
+      <div className="w-full mt-2">
+        <div className={`h-1.5 rounded-full overflow-hidden ${barColors.bg}`}>
+          <div
+            className={`h-full rounded-full transition-all duration-700 ${barColors.bar}`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <p className="text-[9px] text-gray-500 text-center mt-0.5">
+          {progress.current}/{progress.max}
+        </p>
+      </div>
+
+      {/* 下一等级提示 */}
+      {next && (
+        <p className="text-[8px] text-gray-600 text-center mt-0.5 leading-tight">
+          下一级: {next.nextLabel}
+          <span className="text-gray-500"> ({RARITY_LABEL_CN[next.nextRarity] || next.nextRarity})</span>
+          <br />还需 +{next.needed}
+        </p>
+      )}
+      {!next && (
+        <p className="text-[8px] text-amber-400/60 text-center mt-0.5">★ 已满级</p>
+      )}
     </div>
   );
 }
@@ -1316,8 +1454,8 @@ function DeltaRadarChart({ delta }: { delta: Record<string, number> }) {
     { key: "comedy", label: "浮生", reveal: "喜剧", desc: "偏好幽默、荒诞、轻松解压的喜剧类型", color: "#fbbf24" },
     { key: "scifi", label: "异境", reveal: "科幻", desc: "偏好未来主义、太空探索、科技伦理类叙事", color: "#06b6d4" },
     { key: "crime", label: "暗局", reveal: "犯罪", desc: "偏好犯罪、黑帮、警匪、法庭类叙事", color: "#dc2626" },
-    { key: "animation", label: "织梦", reveal: "动画", desc: "偏好动画、定格动画、手绘动画等形式", color: "#f472b6" },
-    { key: "documentary", label: "拾真", reveal: "纪录片", desc: "偏好纪实、非虚构、真实事件改编类叙事", color: "#10b981" },
+    { key: "romance", label: "情澜", reveal: "爱情/言情", desc: "偏好爱情、言情、浪漫关系类叙事", color: "#ff6b9d" },
+    { key: "action", label: "烈风", reveal: "动作/冒险", desc: "偏好动作、冒险、追逐、战斗类叙事", color: "#ff4500" },
   ];
 
   const maxVal = Math.max(...Object.values(delta), 1);

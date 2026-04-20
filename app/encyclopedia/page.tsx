@@ -119,9 +119,29 @@ const getCodeColors = (code: string) => {
 
 export default function EncyclopediaPage() {
   const [expandedType, setExpandedType] = useState<string | null>(null);
+  const [expandedDirectors, setExpandedDirectors] = useState<Set<string>>(new Set());
+  const [expandedFilms, setExpandedFilms] = useState<Set<string>>(new Set());
 
   const toggleExpand = (code: string) => {
     setExpandedType(expandedType === code ? null : code);
+  };
+
+  const toggleDirectors = (code: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedDirectors((prev) => {
+      const next = new Set(prev);
+      next.has(code) ? next.delete(code) : next.add(code);
+      return next;
+    });
+  };
+
+  const toggleFilms = (code: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedFilms((prev) => {
+      const next = new Set(prev);
+      next.has(code) ? next.delete(code) : next.add(code);
+      return next;
+    });
   };
 
   return (
@@ -227,29 +247,51 @@ export default function EncyclopediaPage() {
                         <div>
                           <p className="text-xs text-gray-500 mb-2">代表导演</p>
                           <div className="flex flex-wrap gap-1.5">
-                            {type.directors.slice(0, 4).map((d) => (
+                            {(expandedDirectors.has(type.code) ? type.directors : type.directors.slice(0, 5)).map((d) => (
                               <span
                                 key={d}
-                                className="px-2 py-0.5 bg-[#0a0e1a] rounded text-xs text-gray-400"
+                                className="px-2 py-0.5 bg-[#0a0e1a] rounded-full text-xs text-gray-400"
                               >
                                 {d}
                               </span>
                             ))}
+                            {type.directors.length > 5 && (
+                              <button
+                                onClick={(e) => toggleDirectors(type.code, e)}
+                                className="px-2 py-0.5 rounded-full text-xs text-amber-400/70 hover:text-amber-400 transition-colors"
+                              >
+                                {expandedDirectors.has(type.code) ? "收起" : `+${type.directors.length - 5} 更多`}
+                              </button>
+                            )}
                           </div>
                         </div>
                         <div>
                           <p className="text-xs text-gray-500 mb-2">代表作品</p>
                           <div className="flex flex-wrap gap-1.5">
-                            {type.films.slice(0, 4).map((f) => (
+                            {(expandedFilms.has(type.code) ? type.films : type.films.slice(0, 5)).map((f) => (
                               <span
                                 key={f}
-                                className="px-2 py-0.5 bg-[#0a0e1a] rounded text-xs text-gray-400"
+                                className="px-2 py-0.5 bg-[#0a0e1a] rounded-full text-xs text-gray-400"
                               >
                                 {f}
                               </span>
                             ))}
+                            {type.films.length > 5 && (
+                              <button
+                                onClick={(e) => toggleFilms(type.code, e)}
+                                className="px-2 py-0.5 rounded-full text-xs text-amber-400/70 hover:text-amber-400 transition-colors"
+                              >
+                                {expandedFilms.has(type.code) ? "收起" : `+${type.films.length - 5} 更多`}
+                              </button>
+                            )}
                           </div>
                         </div>
+                        {type.socialLabel && (
+                          <div>
+                            <p className="text-xs text-gray-500 mb-2">社交标签</p>
+                            <p className="text-xs text-gray-400 italic">&ldquo;{type.socialLabel}&rdquo;</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

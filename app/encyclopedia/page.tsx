@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { personalityTypes } from "@/data/types";
+import { questions } from "@/data/questions";
 
 // 四大维度数据
 const dimensions = [
@@ -117,10 +119,28 @@ const getCodeColors = (code: string) => {
   });
 };
 
+// 精简版题目ID（与首页一致）
+const quickQuestionIds = [
+  1, 2, 7, 8,
+  11, 12, 16, 19, 20,
+  21, 26, 28, 45,
+  31, 32, 33, 34, 37, 40, 42,
+  50, 51, 52, 53,
+];
+
 export default function EncyclopediaPage() {
+  const router = useRouter();
   const [expandedType, setExpandedType] = useState<string | null>(null);
   const [expandedDirectors, setExpandedDirectors] = useState<Set<string>>(new Set());
   const [expandedFilms, setExpandedFilms] = useState<Set<string>>(new Set());
+  const [showModeModal, setShowModeModal] = useState(false);
+
+  const handleStartQuiz = (version: "quick" | "full") => {
+    const ids = version === "quick" ? quickQuestionIds : questions.map((_, i) => i + 1);
+    sessionStorage.setItem("fbti_quiz_version", version);
+    sessionStorage.setItem("fbti_question_ids", JSON.stringify(ids));
+    router.push("/quiz");
+  };
 
   const toggleExpand = (code: string) => {
     setExpandedType(expandedType === code ? null : code);
@@ -376,8 +396,8 @@ export default function EncyclopediaPage() {
 
         {/* 页面底部 */}
         <section className="text-center">
-          <Link
-            href="/quiz"
+          <button
+            onClick={() => setShowModeModal(true)}
             className="inline-flex items-center gap-2 px-8 py-4 bg-amber-500 text-gray-900 font-semibold text-lg rounded-lg
                        hover:bg-amber-400 hover:scale-105 transition-all duration-300"
           >
@@ -385,8 +405,81 @@ export default function EncyclopediaPage() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
-          </Link>
+          </button>
         </section>
+
+        {/* 版本选择弹窗 */}
+        {showModeModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowModeModal(false)}
+          >
+            {/* 遮罩 */}
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+            {/* 弹窗内容 */}
+            <div
+              className="relative bg-[#1a1f35] rounded-2xl border border-gray-700 p-6 sm:p-8 max-w-md w-full
+                         animate-in fade-in zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* 关闭按钮 */}
+              <button
+                onClick={() => setShowModeModal(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              <h3 className="text-xl font-bold text-white text-center mb-6">选择测试模式</h3>
+
+              <div className="space-y-3">
+                {/* 精简版 */}
+                <button
+                  onClick={() => handleStartQuiz("quick")}
+                  className="group w-full p-5 bg-[#0a0e1a] rounded-xl border border-gray-700
+                             hover:border-amber-500/50 hover:bg-[#222845] transition-all duration-300 text-left"
+                >
+                  <div className="flex items-start gap-4">
+                    <span className="text-3xl mt-0.5">⚡</span>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-white font-semibold text-base">精简版</span>
+                        <span className="text-amber-400 text-sm">约 2 分钟</span>
+                      </div>
+                      <p className="text-gray-400 text-sm">
+                        {quickQuestionIds.length} 道精选题 · 快速了解你的电影人格
+                      </p>
+                    </div>
+                    <span className="text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity mt-1">→</span>
+                  </div>
+                </button>
+
+                {/* 完整版 */}
+                <button
+                  onClick={() => handleStartQuiz("full")}
+                  className="group w-full p-5 bg-[#0a0e1a] rounded-xl border border-gray-700
+                             hover:border-amber-500/50 hover:bg-[#222845] transition-all duration-300 text-left"
+                >
+                  <div className="flex items-start gap-4">
+                    <span className="text-3xl mt-0.5">🎬</span>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-white font-semibold text-base">完整版</span>
+                        <span className="text-amber-400 text-sm">约 5 分钟</span>
+                      </div>
+                      <p className="text-gray-400 text-sm">
+                        {questions.length} 道题 · 更精准的分析，解锁更多隐藏属性
+                      </p>
+                    </div>
+                    <span className="text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity mt-1">→</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 页脚 */}
         <footer className="text-center mt-16 pt-8 border-t border-gray-800">

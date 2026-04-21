@@ -376,11 +376,11 @@ export default function EncyclopediaPage() {
           <h2 className="text-2xl font-bold text-white mb-8 text-center">
             类型基因 <span className="text-amber-400">δ</span>
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="flex flex-wrap justify-center gap-4">
             {typeGenes.map((gene) => (
               <div
                 key={gene.key}
-                className={`gene-label rounded-xl p-4 border text-center cursor-default`}
+                className={`gene-label rounded-xl p-4 border text-center cursor-default min-w-[120px] max-w-[160px] flex-1`}
                 style={{
                   borderColor: `${gene.color}40`,
                 }}

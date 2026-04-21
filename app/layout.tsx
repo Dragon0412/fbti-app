@@ -47,8 +47,8 @@ export default function RootLayout({
       <head>
         <script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1695694480478235"
-          crossOrigin="anonymous"
+          custom-element="amp-auto-ads"
+          src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"
         />
       </head>
       <body className="min-h-full bg-[#0a0e1a] text-white antialiased">

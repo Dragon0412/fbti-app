@@ -52,11 +52,8 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full bg-[#0a0e1a] text-white antialiased">
-        <div
-          dangerouslySetInnerHTML={{
-            __html: '<amp-auto-ads type="adsense" data-ad-client="ca-pub-1695694480478235"></amp-auto-ads>',
-          }}
-        />
+        {/* @ts-expect-error AMP custom element */}
+        <amp-auto-ads type="adsense" data-ad-client="ca-pub-1695694480478235"></amp-auto-ads>
         {children}
       </body>
     </html>

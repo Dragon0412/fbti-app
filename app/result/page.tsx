@@ -680,7 +680,7 @@ export default function ResultPage() {
             <HiddenAttrCard
               icon="α"
               attrKey="alpha"
-              name="影史罗盘"
+              name="影史沙漏"
               rarity={result.hidden.alpha.rarity}
               label={result.hidden.alpha.label}
               score={result.hidden.alpha.score}
@@ -1235,7 +1235,7 @@ function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typ
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
           {[
-            { icon: "α", name: "影史罗盘", rarity: result.hidden.alpha.rarity, label: result.hidden.alpha.label },
+            { icon: "α", name: "影史沙漏", rarity: result.hidden.alpha.rarity, label: result.hidden.alpha.label },
             { icon: "β", name: "形式感应器", rarity: result.hidden.beta.rarity, label: result.hidden.beta.label },
             { icon: "γ", name: "文化通行证", rarity: result.hidden.gamma.rarity, label: result.hidden.gamma.label },
           ].map((attr) => {

@@ -44,6 +44,13 @@ export default function RootLayout({
       lang="zh-CN"
       className={`${playfair.variable} ${inter.variable} ${notoSerifSc.variable} ${notoSansSc.variable} h-full`}
     >
+      <head>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1695694480478235"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="min-h-full bg-[#0a0e1a] text-white antialiased">
         {children}
       </body>

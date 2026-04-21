@@ -370,9 +370,10 @@ export function calculateResult(answers: AnswerEntry[]): Result {
       horror: 0,
       comedy: 0,
       scifi: 0,
-      crime: 0,
       romance: 0,
       action: 0,
+      drama: 0,
+      animation: 0,
     },
   };
 

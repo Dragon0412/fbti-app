@@ -7,14 +7,14 @@ import Tooltip from "@/components/Tooltip";
 export default function LandingPage() {
   const router = useRouter();
 
-  // 精简版：每个维度精选4-7道 + 4道观影画像题 = 24道
+  // 精简版：每个维度精选4-7道 + 4道观影画像题 = 25道
   const quickQuestionIds = [
     // EA 维度（4道）
     1, 2, 7, 8,
     // XS 维度（5道）
     11, 12, 16, 19, 20,
-    // PW 维度（4道）
-    21, 26, 28, 45,
+    // PW 维度（5道）
+    21, 26, 28, 29, 45,
     // LD 维度（7道）
     31, 32, 33, 34, 37, 40, 42,
     // 观影画像题（4道）- 帮助生成个性化推荐
@@ -24,7 +24,7 @@ export default function LandingPage() {
     53, // 购票习惯
   ];
 
-  // 精简版:24题,约2分钟;完整版:约5分钟
+  // 精简版:25题,约2分钟;完整版:约5分钟
   const quickTime = 2; // 简易版 2 分钟
   const fullTime = 5; // 完整版 5 分钟
 

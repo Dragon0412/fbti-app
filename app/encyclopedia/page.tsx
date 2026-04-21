@@ -104,9 +104,10 @@ const typeGenes = [
   { key: "horror", label: "幽谷", reveal: "恐怖", desc: "偏好惊悚、悬疑、心理恐惧类叙事", color: "#a855f7" },
   { key: "comedy", label: "浮生", reveal: "喜剧", desc: "偏好幽默、荒诞、轻松解压的喜剧类型", color: "#fbbf24" },
   { key: "scifi", label: "异境", reveal: "科幻", desc: "偏好未来主义、太空探索、科技伦理类叙事", color: "#06b6d4" },
-  { key: "crime", label: "暗局", reveal: "犯罪", desc: "偏好犯罪、黑帮、警匪、法庭类叙事", color: "#dc2626" },
-  { key: "romance", label: "情澜", reveal: "爱情/言情", desc: "偏好爱情、言情、浪漫关系类叙事", color: "#ff6b9d" },
+  { key: "romance", label: "情澜", reveal: "爱情", desc: "偏好爱情、浪漫关系类叙事", color: "#ff6b9d" },
   { key: "action", label: "烈风", reveal: "动作/冒险", desc: "偏好动作、冒险、追逐、战斗类叙事", color: "#ff4500" },
+  { key: "drama", label: "沉光", reveal: "剧情", desc: "偏好人物深度、角色发展、演技、情感弧线类叙事", color: "#e8a87c" },
+  { key: "animation", label: "织梦", reveal: "动画", desc: "偏好动画艺术、二次元、奇幻世界构建类作品", color: "#4ade80" },
 ];
 
 // 人格代码颜色配置

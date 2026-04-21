@@ -283,7 +283,7 @@ export const questions: Question[] = [
       {
         label: "能看到他的技术——微表情、口音变化、肢体语言的处理",
         scores: { A: 1 },
-        hiddenSignals: [{ attribute: "β", weight: 1 }],
+        hiddenSignals: [{ attribute: "β", weight: 1 }, { attribute: "δ", genre: "drama", weight: 1 }],
         type: "substantive",
       },
     ],
@@ -842,6 +842,7 @@ export const questions: Question[] = [
           { attribute: "α", weight: 1 },
           { attribute: "δ", genre: "romance", weight: 1 },
           { attribute: "δ", genre: "comedy", weight: 1 },
+          { attribute: "δ", genre: "animation", weight: 1 },
         ],
         type: "substantive",
       },
@@ -935,7 +936,7 @@ export const questions: Question[] = [
       {
         label: "一对初恋情侣在一个漫长的雨夜里的对话和沉默——整部电影就在一个房间里，你可以看清他们脸上的每一丝表情变化",
         scores: { P: 1 },
-        hiddenSignals: [{ attribute: "δ", genre: "romance", weight: 1 }],
+        hiddenSignals: [{ attribute: "δ", genre: "romance", weight: 1 }, { attribute: "δ", genre: "drama", weight: 0.5 }],
         type: "substantive",
       },
       {
@@ -986,7 +987,7 @@ export const questions: Question[] = [
       {
         label: "出发时带着一个解不开的心结，终点无所谓——重要的是路上他终于想通了",
         scores: { P: 1 },
-        hiddenSignals: [{ attribute: "δ", genre: "romance", weight: 1 }],
+        hiddenSignals: [{ attribute: "δ", genre: "romance", weight: 1 }, { attribute: "δ", genre: "drama", weight: 0.5 }],
         type: "substantive",
       },
       {
@@ -1147,26 +1148,25 @@ export const questions: Question[] = [
       {
         label: "角色的堕落弧线——看一个人一步步走向深渊，明知不对但移不开眼",
         scores: { P: 1 },
-        hiddenSignals: [{ attribute: "δ", genre: "crime", weight: 1 }],
+        hiddenSignals: [{ attribute: "δ", genre: "drama", weight: 1 }],
         type: "substantive",
       },
       {
         label: "智力博弈——计划、反转、局中局，看谁比谁更聪明",
         scores: { W: 0.5, A: 0.5 },
-        hiddenSignals: [{ attribute: "δ", genre: "crime", weight: 1 }],
+        hiddenSignals: [{ attribute: "δ", genre: "drama", weight: 1 }],
         type: "substantive",
       },
       {
         label: "系统的暗面——权力怎么运转、钱怎么流动、规则怎么在桌子下面被改写",
         scores: { W: 1 },
-        hiddenSignals: [{ attribute: "δ", genre: "crime", weight: 1 }],
+        hiddenSignals: [{ attribute: "δ", genre: "drama", weight: 1 }],
         type: "substantive",
       },
       {
         label: "纯粹的肾上腺素——追车、枪战、千钧一发，就是要那个紧张感",
         scores: { E: 0.5 },
         hiddenSignals: [
-          { attribute: "δ", genre: "crime", weight: 1 },
           { attribute: "δ", genre: "action", weight: 1 },
         ],
         type: "substantive",
@@ -1207,11 +1207,13 @@ export const questions: Question[] = [
       {
         label: "一个生命体的内在旅程——关于成长、失去、和理解「我是谁」",
         scores: { P: 1 },
+        hiddenSignals: [{ attribute: "δ", genre: "animation", weight: 1 }],
         type: "substantive",
       },
       {
         label: "一个奇幻世界的宏大冒险——新物种、新法则、一场改变一切的远征",
         scores: { W: 1 },
+        hiddenSignals: [{ attribute: "δ", genre: "animation", weight: 1 }],
         type: "substantive",
       },
       {
@@ -1473,7 +1475,6 @@ export const questions: Question[] = [
         scores: { D: 1 },
         hiddenSignals: [
           { attribute: "δ", genre: "horror", weight: 2 },
-          { attribute: "δ", genre: "crime", weight: 1 },
         ],
         type: "substantive",
       },
@@ -1497,7 +1498,7 @@ export const questions: Question[] = [
         label: "真实的暗面，不自欺不欺人——他清楚自己在做什么、为什么做，那种诚实本身就有致命的魅力",
         scores: { D: 1 },
         hiddenSignals: [
-          { attribute: "δ", genre: "crime", weight: 1 },
+          { attribute: "δ", genre: "drama", weight: 1 },
           { attribute: "δ", genre: "horror", weight: 1 },
         ],
         type: "substantive",
@@ -1506,7 +1507,7 @@ export const questions: Question[] = [
         label: "道德的雾区——每一步都能说出理由，你理解他、甚至会替他开脱，直到最后才发现自己站错了边",
         scores: { L: 0.3, D: 0.3 },
         hiddenSignals: [
-          { attribute: "δ", genre: "crime", weight: 1 },
+          { attribute: "δ", genre: "drama", weight: 1 },
         ],
         type: "substantive",
       },
@@ -1594,7 +1595,7 @@ export const questions: Question[] = [
         label: "不留退路——系统性的碾压，没有温情滤镜，只有真实的重量",
         scores: { D: 1 },
         hiddenSignals: [
-          { attribute: "δ", genre: "crime", weight: 1 },
+          { attribute: "δ", genre: "drama", weight: 1 },
         ],
         type: "substantive",
       },
@@ -1640,7 +1641,6 @@ export const questions: Question[] = [
         label: "侧重代价和残酷——反抗者付出了什么、失去了什么、最后得到了什么",
         scores: { D: 1 },
         hiddenSignals: [
-          { attribute: "δ", genre: "crime", weight: 1 },
           { attribute: "δ", genre: "horror", weight: 1 },
         ],
         type: "substantive",
@@ -1694,12 +1694,14 @@ export const questions: Question[] = [
           { attribute: "α", weight: 1 },
           { attribute: "δ", genre: "romance", weight: 1 },
           { attribute: "δ", genre: "comedy", weight: 1 },
+          { attribute: "δ", genre: "animation", weight: 0.5 },
         ],
         type: "substantive",
       },
       {
         label: "儿童眼中的真相——大人世界的残酷、谎言和虚伪，通过孩子的视角无所遁形",
         scores: { D: 1 },
+        hiddenSignals: [{ attribute: "δ", genre: "drama", weight: 0.5 }],
         type: "substantive",
       },
       {
@@ -1765,6 +1767,7 @@ export const questions: Question[] = [
         hiddenSignals: [
           { attribute: "α", weight: 1 },
           { attribute: "δ", genre: "scifi", weight: 1 },
+          { attribute: "δ", genre: "animation", weight: 0.5 },
         ],
         type: "substantive",
       },
@@ -1890,6 +1893,74 @@ export const questions: Question[] = [
       3: "内容至上",
       4: "随缘派",
       5: "居家党",
+    },
+  },
+
+  // Q54 · 动画电影视觉风格 (multi)
+  {
+    id: 54,
+    questionType: "multi",
+    primaryDimension: "PW",
+    text: "动画电影的视觉表现风格，对你的吸引力有多大？",
+    options: [
+      {
+        label: "2D手绘的温暖感——每一帧都是艺术，线条的力量胜过任何3D特效",
+        scores: { P: 1, E: 0.5 },
+        hiddenSignals: [
+          { attribute: "δ", genre: "animation", weight: 1 },
+          { attribute: "β", weight: 1 },
+        ],
+        type: "substantive",
+      },
+      {
+        label: "3D+写实渲染的沉浸感——现代技术让虚拟世界和真实无异，这才是动画的未来",
+        scores: { W: 1, A: 0.5 },
+        hiddenSignals: [
+          { attribute: "δ", genre: "animation", weight: 1 },
+          { attribute: "β", weight: 1 },
+        ],
+        type: "substantive",
+      },
+      {
+        label: "混合风格——日式、欧美、中式各有特色，看故事选风格",
+        scores: { X: 1 },
+        hiddenSignals: [{ attribute: "δ", genre: "animation", weight: 0.5 }],
+        type: "substantive",
+      },
+      {
+        label: "风格无所谓，故事好就行",
+        scores: { E: 0.5 },
+        type: "substantive",
+      },
+      {
+        label: "我不特别关注动画电影",
+        scores: {},
+        type: "skip",
+      },
+    ],
+    image: {
+      type: "tmdb",
+      layout: "grid3",
+      tmdb: [
+        {
+          title_zh: "千与千寻",
+          title_en: "Spirited Away",
+          year: 2001,
+          hover: "千与千寻 · 2001 · 导演: 宫崎骏 · 手绘动画美学的巅峰 · 奥斯卡最佳动画",
+        },
+        {
+          title_zh: "蜘蛛侠：平行宇宙",
+          title_en: "Spider-Man: Into the Spider-Verse",
+          year: 2018,
+          hover: "蜘蛛侠：平行宇宙 · 2018 · 导演: 鲍勃·佩尔西凯蒂 · 3D动画美学革新",
+        },
+        {
+          title_zh: "你的名字。",
+          title_en: "Your Name.",
+          year: 2016,
+          hover: "你的名字。 · 2016 · 导演: 新海诚 · 日式美学与想象力的结晶",
+        },
+      ],
     },
   },
 ];

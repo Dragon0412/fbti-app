@@ -396,7 +396,7 @@ export default function EncyclopediaPage() {
         </section>
 
         {/* 页面底部 */}
-        <section className="text-center">
+        <section className="text-center space-y-4">
           <button
             onClick={() => setShowModeModal(true)}
             className="inline-flex items-center gap-2 px-8 py-4 bg-amber-500 text-gray-900 font-semibold text-lg rounded-lg
@@ -407,6 +407,15 @@ export default function EncyclopediaPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </button>
+          <div>
+            <Link
+              href="/stats"
+              className="inline-flex items-center gap-2 px-6 py-2.5 text-sm text-gray-400 border border-gray-700 rounded-lg
+                         hover:border-amber-500/50 hover:text-amber-400 transition-all duration-300"
+            >
+              全站统计
+            </Link>
+          </div>
         </section>
 
         {/* 版本选择弹窗 */}

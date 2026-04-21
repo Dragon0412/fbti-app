@@ -1,0 +1,20 @@
+{
+  "totalCount": 0,
+  "dailyCounts": {},
+  "personalityTypes": {},
+  "typeGenes": {
+    "horror": { "sum": 0, "count": 0 },
+    "comedy": { "sum": 0, "count": 0 },
+    "scifi": { "sum": 0, "count": 0 },
+    "romance": { "sum": 0, "count": 0 },
+    "action": { "sum": 0, "count": 0 },
+    "drama": { "sum": 0, "count": 0 },
+    "animation": { "sum": 0, "count": 0 }
+  },
+  "hiddenAttributes": {
+    "alpha": { "common": 0, "uncommon": 0, "rare": 0, "legendary": 0 },
+    "beta": { "common": 0, "uncommon": 0, "rare": 0, "legendary": 0 },
+    "gamma": { "common": 0, "uncommon": 0, "rare": 0, "legendary": 0 }
+  },
+  "geneShapes": {}
+}

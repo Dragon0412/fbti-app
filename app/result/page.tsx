@@ -200,13 +200,36 @@ export default function ResultPage() {
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
 
+  const hasSubmittedStats = useRef(false);
+
   useEffect(() => {
     const stored = sessionStorage.getItem("fbti_result");
     if (!stored) {
       router.push("/");
       return;
     }
-    setResult(JSON.parse(stored));
+    const parsed = JSON.parse(stored);
+    setResult(parsed);
+
+    // 自动提交统计数据（静默失败）
+    if (!hasSubmittedStats.current) {
+      hasSubmittedStats.current = true;
+      const shape = analyzeGeneShape(parsed.hidden.delta);
+      fetch("/api/stats/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          result: {
+            type: parsed.type,
+            delta: parsed.hidden.delta,
+            alpha: { rarity: parsed.hidden.alpha.rarity },
+            beta: { rarity: parsed.hidden.beta.rarity },
+            gamma: { rarity: parsed.hidden.gamma.rarity },
+            geneShape: shape.tag,
+          },
+        }),
+      }).catch(() => {});
+    }
 
     // 生成二维码
     const currentUrl = window.location.href;
@@ -801,6 +824,15 @@ export default function ResultPage() {
               查看图鉴
             </Link>
           </Tooltip>
+
+          <Link
+            href="/stats"
+            className="w-full py-4 bg-[#1a1f35] text-gray-400 font-medium text-base rounded-lg
+                       border border-gray-700/50 hover:bg-[#222845] hover:text-amber-400 hover:border-amber-500/30
+                       text-center transition-all duration-300"
+          >
+            查看全站统计
+          </Link>
         </div>
 
         {/* Footer */}

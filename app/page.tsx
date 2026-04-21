@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { questions } from "@/data/questions";
 import Tooltip from "@/components/Tooltip";
+import StatsPreview from "@/components/StatsPreview";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -142,6 +143,12 @@ export default function LandingPage() {
               探索图鉴
             </button>
           </Tooltip>
+        </div>
+
+        {/* 统计摘要区域 */}
+        <div className="mt-12 text-center">
+          <h3 className="text-sm text-gray-400 uppercase tracking-wider mb-4">全站统计</h3>
+          <StatsPreview />
         </div>
 
         {/* Footer */}

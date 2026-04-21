@@ -38,7 +38,7 @@ const dimensions = [
 const hiddenAttributes = {
   alpha: {
     icon: "α",
-    name: "时间穿越者",
+    name: "影史罗盘",
     desc: "你的影史跨度",
     levels: [
       { rarity: "common", label: "影院漫步者", desc: "主要关注近年电影" },

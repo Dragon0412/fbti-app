@@ -103,23 +103,75 @@ const GENRE_LABEL_MAP: Record<string, string> = {
 };
 
 function analyzeGeneShape(delta: Record<string, number>): { tag: string; description: string } {
-  const scores = Object.values(delta);
+  const entries = Object.entries(delta).sort((a, b) => b[1] - a[1]);
+  const scores = entries.map(([, v]) => v);
+  const keys = entries.map(([k]) => k);
+
   if (scores.length === 0) return { tag: "全能影迷", description: "" };
-  const max = Math.max(...scores);
+
+  const max = scores[0];
+  const min = scores[scores.length - 1];
   const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
   const variance = scores.reduce((a, b) => a + (b - avg) ** 2, 0) / scores.length;
+  const sum = scores.reduce((a, b) => a + b, 0);
+  const getName = (k: string) => GENRE_LABEL_MAP[k] || k;
 
-  if (variance < 1.5) {
-    return { tag: "全能影迷型", description: "你的类型基因分布均匀，几乎各种类型都能欣赏——这是最高级的电影修养表现。" };
-  } else if (max > avg * 2) {
-    const topKey = Object.entries(delta).sort((a, b) => b[1] - a[1])[0][0];
-    const topName = GENRE_LABEL_MAP[topKey] || topKey;
-    return { tag: "类型专家型", description: `你在「${topName}」维度上有极强的偏好，是这个类型的深度爱好者。` };
-  } else {
-    const sorted = Object.entries(delta).sort((a, b) => b[1] - a[1]);
-    const top2 = sorted.slice(0, 2).map(([k]) => GENRE_LABEL_MAP[k] || k);
-    return { tag: "混搭型", description: `你的类型偏好集中在「${top2[0]}」和「${top2[1]}」，这是一个有趣的品味组合。` };
+  const top1 = scores[0];
+  const top2 = scores.length > 1 ? scores[1] : 0;
+  const top3 = scores.length > 2 ? scores[2] : 0;
+
+  // 1. 基因待激活：几乎没有触发任何信号
+  if (sum < 3 || max < 2) {
+    return { tag: "基因待激活", description: "你的类型基因尚在沉睡中，也许需要更多观影探索来唤醒它们。" };
   }
+
+  // 2. 全能影迷型：方差极小且平均分较高
+  if (variance < 1.5 && avg >= 3) {
+    return { tag: "全能影迷型", description: "你的类型基因分布均匀且充沛，几乎各种类型都能欣赏——这是最高级的电影修养表现。" };
+  }
+
+  // 3. 均衡探索型：方差小但分数不高
+  if (variance < 1.5) {
+    return { tag: "均衡探索型", description: "你的观影口味比较均衡，对各种类型都保持着开放的好奇心——继续探索，你的基因图谱会越来越丰富。" };
+  }
+
+  // 4. 极致专精型：某一类型远超其他且压倒性领先第二名
+  if (top1 > avg * 2.5 && top1 > top2 * 2) {
+    return { tag: "极致专精型", description: `你几乎把全部热情倾注在「${getName(keys[0])}」上——在这个领域，你是真正的行家里手。` };
+  }
+
+  // 5. 类型专家型：某一类型显著高于平均
+  if (top1 > avg * 2) {
+    return { tag: "类型专家型", description: `你在「${getName(keys[0])}」维度上有极强的偏好，是这个类型的深度爱好者。` };
+  }
+
+  // 6. 双核驱动型 / 反差萌型：两个类型并驾齐驱
+  if (top2 > avg * 1.5 && top1 - top2 < 2) {
+    const contrastPairs: [string, string][] = [
+      ["horror", "romance"], ["horror", "comedy"], ["scifi", "romance"],
+      ["action", "drama"], ["horror", "animation"], ["drama", "comedy"],
+    ];
+    const isContrast = contrastPairs.some(([a, b]) =>
+      (keys[0] === a && keys[1] === b) || (keys[0] === b && keys[1] === a)
+    );
+    if (isContrast) {
+      return { tag: "反差萌型", description: `「${getName(keys[0])}」与「${getName(keys[1])}」的组合出人意料——你的品味充满迷人的矛盾张力。` };
+    }
+    return { tag: "双核驱动型", description: `「${getName(keys[0])}」和「${getName(keys[1])}」是你的双引擎——这两个维度共同塑造了你的观影DNA。` };
+  }
+
+  // 7. 三足鼎立型：三个类型均衡突出
+  if (top3 > avg * 1.3 && top1 - top3 < 2) {
+    return { tag: "三足鼎立型", description: `「${getName(keys[0])}」「${getName(keys[1])}」「${getName(keys[2])}」三驾马车齐头并进，你的观影口味丰富而有层次。` };
+  }
+
+  // 8. 偏科影迷型：极端分化，爱的极爱，不爱的完全不碰
+  if (max - min > 5 && variance > 4) {
+    return { tag: "偏科影迷型", description: "你的类型偏好分化明显——热爱的极度热爱，无感的完全不碰，个性鲜明且立场坚定。" };
+  }
+
+  // 9. 混搭型：默认兜底
+  return { tag: "混搭型", description: `你的类型偏好集中在「${getName(keys[0])}」和「${getName(keys[1])}」，这是一个有趣的品味组合。` };
 }
 
 const CODE_MEANINGS: Record<string, string> = {
@@ -628,7 +680,7 @@ export default function ResultPage() {
             <HiddenAttrCard
               icon="α"
               attrKey="alpha"
-              name="时间穿越者"
+              name="影史罗盘"
               rarity={result.hidden.alpha.rarity}
               label={result.hidden.alpha.label}
               score={result.hidden.alpha.score}
@@ -1183,7 +1235,7 @@ function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typ
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
           {[
-            { icon: "α", name: "时间穿越者", rarity: result.hidden.alpha.rarity, label: result.hidden.alpha.label },
+            { icon: "α", name: "影史罗盘", rarity: result.hidden.alpha.rarity, label: result.hidden.alpha.label },
             { icon: "β", name: "形式感应器", rarity: result.hidden.beta.rarity, label: result.hidden.beta.label },
             { icon: "γ", name: "文化通行证", rarity: result.hidden.gamma.rarity, label: result.hidden.gamma.label },
           ].map((attr) => {

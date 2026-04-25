@@ -44,5 +44,8 @@ next-env.d.ts
 nohup.out
 server.log
 
+# stats (runtime data)
+data/stats.json
+
 # qoder
 .qoder/

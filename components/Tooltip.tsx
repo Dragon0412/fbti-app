@@ -1,14 +1,12 @@
 interface TooltipProps {
   children: React.ReactNode;
   text: string;
-  mobileHint?: string; // 移动端始终显示的提示
   position?: "top" | "bottom" | "left" | "right";
 }
 
 export default function Tooltip({ 
   children, 
   text, 
-  mobileHint,
   position = "top" 
 }: TooltipProps) {
   const positionClasses = {
@@ -36,13 +34,6 @@ export default function Tooltip({
         {text}
         <div className={`absolute w-0 h-0 ${arrowClasses[position]}`} />
       </div>
-
-      {/* Mobile hint - always show below */}
-      {mobileHint && (
-        <div className="md:hidden text-[10px] text-gray-500 text-center mt-1.5 leading-tight">
-          {mobileHint}
-        </div>
-      )}
 
       {/* Children (button) */}
       {children}

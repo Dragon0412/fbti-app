@@ -87,7 +87,6 @@ export default function TestLandingPage() {
           {/* Quick version */}
           <Tooltip 
             text="24 道精选题目，快速测试" 
-            mobileHint="24 题 · 约 2 分钟"
           >
             <button
               onClick={() => handleStartQuiz("quick")}
@@ -112,7 +111,6 @@ export default function TestLandingPage() {
           {/* Full version */}
           <Tooltip 
             text="完整题库，深度分析你的观影偏好" 
-            mobileHint="完整题库 · 约 5 分钟"
           >
             <button
               onClick={() => handleStartQuiz("full")}
@@ -139,7 +137,6 @@ export default function TestLandingPage() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Tooltip 
             text="返回正式版首页" 
-            mobileHint="返回正式版"
           >
             <button
               onClick={() => router.push("/")}

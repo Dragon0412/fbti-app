@@ -9,7 +9,7 @@ export async function GET() {
   try {
     const statsPath = path.join(process.cwd(), "data", "stats.json");
     const data = JSON.parse(fs.readFileSync(statsPath, "utf-8"));
-    statsCount = data.totalSubmissions || 0;
+    statsCount = data.totalCount || 0;
   } catch {}
 
   return NextResponse.json({

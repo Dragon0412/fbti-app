@@ -779,7 +779,6 @@ export default function ResultPage() {
         <div className="flex flex-col gap-3">
           <Tooltip 
             text="生成精美卡片，分享到社交媒体" 
-            mobileHint="下载分享卡片"
           >
             <button
               onClick={handleShare}
@@ -795,7 +794,6 @@ export default function ResultPage() {
           
           <Tooltip 
             text="回到首页，重新选择测试类型" 
-            mobileHint="返回首页"
           >
             <button
               onClick={handleRetake}
@@ -809,7 +807,6 @@ export default function ResultPage() {
           
           <Tooltip 
             text="浏览 16 种电影人格类型详解" 
-            mobileHint="查看所有类型"
           >
             <Link
               href="/encyclopedia"

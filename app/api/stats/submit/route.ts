@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { updateStats } from "@/utils/stats-store";
 
 const VALID_TYPES = [
-  "ARCH", "CHRN", "CRIT", "CULT", "DRAM", "EXPL", "HIST",
-  "MODR", "NOIR", "POPG", "REAL", "RETF", "ROMN", "SCFI", "SURR", "VISL"
+  "ASPD", "ASPL", "ASWD", "ASWL", "AXPD", "AXPL", "AXWD", "AXWL",
+  "ESPD", "ESPL", "ESWD", "ESWL", "EXPD", "EXPL", "EXWD", "EXWL"
 ];
 
 function validateSubmission(data: unknown): { valid: boolean; error?: string } {
@@ -17,7 +17,7 @@ function validateSubmission(data: unknown): { valid: boolean; error?: string } {
 
   if (!r.delta || typeof r.delta !== 'object') return { valid: false, error: 'Missing delta' };
   const delta = r.delta as Record<string, number>;
-  const genes = ['narrative', 'visual', 'emotion', 'intellect', 'social', 'sensory', 'escapism'];
+  const genes = ['horror', 'comedy', 'scifi', 'romance', 'action', 'drama', 'animation'];
   for (const g of genes) {
     if (typeof delta[g] !== 'number' || delta[g] < 0 || delta[g] > 100) {
       return { valid: false, error: `Invalid delta.${g}` };

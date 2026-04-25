@@ -9,7 +9,12 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
-const TMDB_API_KEY = "05b5d0763ad31ee3e57d8afc18b25a48";
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
+if (!TMDB_API_KEY) {
+  console.error('错误: 未设置 TMDB_API_KEY 环境变量');
+  console.error('请运行: export TMDB_API_KEY=your_api_key');
+  process.exit(1);
+}
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
 

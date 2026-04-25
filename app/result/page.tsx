@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Result } from "@/utils/calculator";
 import { personalityTypes } from "@/data/types";
 import { questions } from "@/data/questions";
-import html2canvas from "html2canvas";
+import { domToPng } from "modern-screenshot";
 import QRCode from "qrcode";
 import Tooltip from "@/components/Tooltip";
 
@@ -272,31 +272,27 @@ export default function ResultPage() {
   const geneShape = result ? analyzeGeneShape(result.hidden.delta) : null;
 
   const handleShare = useCallback(async () => {
+    // 如果已有缓存的分享图片，直接显示
+    if (generatedImage) {
+      setShowImagePreview(true);
+      return;
+    }
+
     setGenerating(true);
     setShowCard(true);
-    // Wait for React to render the card in the DOM
+    // 等待 React 渲染卡片到 DOM
     await new Promise((r) => setTimeout(r, 100));
     const el = document.getElementById("share-card-capture");
     if (!el) { setGenerating(false); return; }
-    // Wait for fonts
-    await document.fonts.ready;
-    await new Promise((r) => setTimeout(r, 500));
 
     try {
-      const canvas = await html2canvas(el, {
+      const dataUrl = await domToPng(el, {
         backgroundColor: "#0a0e1a",
         scale: 2,
-        useCORS: true,
-        logging: false,
         width: el.scrollWidth,
         height: el.scrollHeight,
-        scrollX: 0,
-        scrollY: 0,
-      } as never);
-      
-      // 生成图片URL并显示预览
-      const imageUrl = canvas.toDataURL("image/png");
-      setGeneratedImage(imageUrl);
+      });
+      setGeneratedImage(dataUrl);
       setShowImagePreview(true);
     } catch (e) {
       console.error("Failed to generate share card:", e);
@@ -304,7 +300,7 @@ export default function ResultPage() {
       setShowCard(false);
       setGenerating(false);
     }
-  }, [result]);
+  }, [result, generatedImage]);
 
   // Loading state
   if (!showContent) {
@@ -851,7 +847,7 @@ export default function ResultPage() {
         </div>
       </div>
 
-      {/* Share Card — rendered off-screen for html2canvas */}
+      {/* Share Card — rendered off-screen for modern-screenshot */}
       {showCard && (
         <div style={{ position: "fixed", left: "-9999px", top: 0 }}>
           <ShareCardContent result={result} typeData={typeData} qrCodeUrl={qrCodeUrl} />
@@ -1059,7 +1055,7 @@ export default function ResultPage() {
   );
 }
 
-/** Share card rendered as HTML for html2canvas */
+/** Share card rendered as HTML for modern-screenshot */
 function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typeData: { name: string; tagline: string; socialLabel: string; description: string } | null; qrCodeUrl?: string }) {
   const amber = "#d4a853";
   const amberDim = "rgba(212, 168, 83, 0.7)";
@@ -1271,7 +1267,7 @@ function ShareCardContent({ result, typeData, qrCodeUrl }: { result: Result; typ
             { icon: "β", name: "形式感应器", rarity: result.hidden.beta.rarity, label: result.hidden.beta.label },
             { icon: "γ", name: "文化通行证", rarity: result.hidden.gamma.rarity, label: result.hidden.gamma.label },
           ].map((attr) => {
-            // 纯色，确保html2canvas正确渲染（渐变文字不被支持）
+            // 纯色，确保截图正确渲染（渐变文字不被支持）
             const iconColor = attr.icon === 'α'
               ? '#ee5a6f'
               : attr.icon === 'β'

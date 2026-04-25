@@ -53,6 +53,17 @@ export default function RootLayout({
       </head>
       <body className="min-h-full bg-[#0a0e1a] text-white antialiased">
         {children}
+        <footer className="w-full py-4 flex justify-center">
+          <a
+            href="https://stats.uptimerobot.com/8SFsjhzzd8"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-400 transition-colors duration-200"
+          >
+            <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+            服务状态
+          </a>
+        </footer>
       </body>
     </html>
   );

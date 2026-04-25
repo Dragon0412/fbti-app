@@ -5,7 +5,8 @@ export async function GET() {
   try {
     const stats = readStats();
     return NextResponse.json(stats);
-  } catch {
+  } catch (err) {
+    console.error('[STATS_READ_ERROR]', err);
     return NextResponse.json({ error: "Failed to read stats" }, { status: 500 });
   }
 }

@@ -1,6 +1,5 @@
 import { POSTER_MAP } from '@/data/posterMap';
 
-const TMDB_API_KEY = "05b5d0763ad31ee3e57d8afc18b25a48";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 
 export interface TmdbMovie {
@@ -58,23 +57,38 @@ const movieTitleMap: Record<string, string> = {
 
 export async function searchMovie(query: string, year?: number): Promise<TmdbMovie | null> {
   try {
-    const params = new URLSearchParams({
-      api_key: TMDB_API_KEY,
-      query,
-      language: "zh-CN",
-    });
-    if (year) {
-      params.append("year", year.toString());
+    if (typeof window !== 'undefined') {
+      // Client-side: use backend proxy
+      const params = new URLSearchParams({ query });
+      if (year) params.append("year", year.toString());
+      const response = await fetch(`/api/tmdb/search?${params}`);
+      if (!response.ok) return null;
+      const data = await response.json();
+      if (data.results && data.results.length > 0) {
+        return data.results[0];
+      }
+      return null;
+    } else {
+      // Server-side: use env variable directly
+      const apiKey = process.env.TMDB_API_KEY;
+      if (!apiKey) {
+        console.error('[TMDB_ERROR] TMDB_API_KEY not configured');
+        return null;
+      }
+      const params = new URLSearchParams({
+        api_key: apiKey,
+        query,
+        language: "zh-CN",
+      });
+      if (year) params.append("year", year.toString());
+      const response = await fetch(`${TMDB_BASE_URL}/search/movie?${params}`);
+      if (!response.ok) return null;
+      const data = await response.json();
+      if (data.results && data.results.length > 0) {
+        return data.results[0];
+      }
+      return null;
     }
-
-    const response = await fetch(`${TMDB_BASE_URL}/search/movie?${params}`);
-    if (!response.ok) return null;
-
-    const data = await response.json();
-    if (data.results && data.results.length > 0) {
-      return data.results[0];
-    }
-    return null;
   } catch (error) {
     console.error(`Error searching movie ${query}:`, error);
     return null;

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { personalityTypes } from "@/data/types";
 
 interface StatsData {
   totalCount: number;
@@ -152,6 +153,7 @@ export default function StatsPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-gray-500 w-5">{i + 1}.</span>
                     <span className="font-mono font-bold text-amber-400">{code}</span>
+                    <span className="text-xs text-gray-400">{personalityTypes[code]?.name}</span>
                   </div>
                   <span className="text-sm text-gray-400">{count} 人</span>
                 </div>
@@ -192,6 +194,9 @@ export default function StatsPage() {
                     {/* Label */}
                     <span className={`text-[10px] mt-1.5 font-mono ${isMax ? "text-amber-400 font-bold" : isMin ? "text-red-400 font-bold" : "text-gray-500"}`}>
                       {code}
+                    </span>
+                    <span className={`text-[8px] ${isMax ? "text-amber-400/80" : isMin ? "text-red-400/80" : "text-gray-600"}`}>
+                      {personalityTypes[code]?.name}
                     </span>
                     {isMax && <span className="text-[8px] text-amber-400/70">最多</span>}
                     {isMin && <span className="text-[8px] text-red-400/70">最少</span>}

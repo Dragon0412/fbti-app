@@ -421,7 +421,6 @@ export default function ResultPage() {
                       </div>
                     ) : (
                       <div className="py-8">
-                        <div className="tear-line"></div>
                         <p className="text-gray-400 mt-4 animate-fade-in">
                           正在揭晓你的电影人格...
                         </p>

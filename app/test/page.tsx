@@ -86,7 +86,7 @@ export default function TestLandingPage() {
         <div className="flex flex-col gap-4 mb-10">
           {/* Quick version */}
           <Tooltip 
-            text="24 道精选题目，快速测试" 
+            text={`${quickQuestionIds.length} 道精选题目，快速测试`} 
           >
             <button
               onClick={() => handleStartQuiz("quick")}

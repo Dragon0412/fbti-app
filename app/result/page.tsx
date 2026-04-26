@@ -329,7 +329,7 @@ export default function ResultPage() {
   const hasHighRarity = highRarityAttrs.length > 0;
 
   return (
-    <main className="min-h-screen bg-[#050810] relative overflow-hidden">
+    <main className="min-h-screen bg-[#050810]/80 relative overflow-hidden">
       {/* 影院射光效果 */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[800px] bg-gradient-to-b from-amber-500/5 via-amber-500/2 to-transparent blur-3xl"></div>
@@ -456,7 +456,7 @@ export default function ResultPage() {
             {/* 底部提示 */}
             {!isTearing && (
               <p className="text-center text-sm text-gray-500 mt-6 animate-fade-in">
-                ✨ 撕开票根，发现你的专属电影人格
+                撕开票根，发现你的专属电影人格
               </p>
             )}
           </div>
@@ -464,7 +464,7 @@ export default function ResultPage() {
       )}
 
       {/* 影院氛围背景 */}
-      <div className="relative min-h-screen bg-[#050810] overflow-hidden">
+      <div className="relative min-h-screen bg-transparent overflow-hidden">
         {/* 射光效果 */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[800px] bg-gradient-to-b from-amber-500/5 via-amber-500/2 to-transparent blur-3xl"></div>
@@ -817,14 +817,18 @@ export default function ResultPage() {
             </Link>
           </Tooltip>
 
-          <Link
-            href="/stats"
-            className="w-full py-4 bg-[#1a1f35] text-gray-400 font-medium text-base rounded-lg
-                       border border-gray-700/50 hover:bg-[#222845] hover:text-amber-400 hover:border-amber-500/30
-                       text-center transition-all duration-300"
+          <Tooltip 
+            text="查看所有用户的测试数据统计" 
           >
-            查看全站统计
-          </Link>
+            <Link
+              href="/stats"
+              className="w-full py-4 bg-[#1a1f35] text-gray-300 font-semibold text-lg rounded-lg
+                         border border-gray-700 hover:bg-[#222845] hover:text-white hover:border-gray-600
+                         text-center transition-all duration-300"
+            >
+              查看全站统计
+            </Link>
+          </Tooltip>
         </div>
 
         {/* Footer */}
@@ -862,7 +866,7 @@ export default function ResultPage() {
           >
             {/* 提示文字 */}
             <div className="text-center mb-4 text-white">
-              <p className="text-lg font-semibold mb-2">🎉 分享卡片已生成</p>
+              <p className="text-lg font-semibold mb-2">分享卡片已生成</p>
               <p className="text-sm text-gray-300">长按图片保存 / 右键保存图片</p>
             </div>
             
@@ -1510,7 +1514,7 @@ function HiddenAttrCard({
         </p>
       )}
       {!next && (
-        <p className="text-[8px] text-amber-400/60 text-center mt-0.5">★ 已满级</p>
+        <p className="text-[8px] text-amber-400/60 text-center mt-0.5">已满级</p>
       )}
     </div>
   );

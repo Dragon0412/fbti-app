@@ -6,6 +6,7 @@ import {
   Noto_Sans_SC,
 } from "next/font/google";
 import "./globals.css";
+import PosterWall from "@/components/PosterWall";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -51,9 +52,11 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className="min-h-full bg-[#0a0e1a] text-white antialiased">
-        {children}
-        <footer className="w-full py-4 flex justify-center">
+      <body className="min-h-full bg-[#0a0e1a] text-white antialiased relative">
+        <PosterWall />
+        <div className="relative z-10">
+          {children}
+          <footer className="w-full py-4 flex justify-center">
           <a
             href="https://stats.uptimerobot.com/8SFsjhzzd8"
             target="_blank"
@@ -63,7 +66,8 @@ export default function RootLayout({
             <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
             服务状态
           </a>
-        </footer>
+          </footer>
+        </div>
       </body>
     </html>
   );

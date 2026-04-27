@@ -232,8 +232,8 @@ export default function ResultPage() {
     }
 
     // 生成二维码
-    const currentUrl = window.location.href;
-    QRCode.toDataURL(currentUrl, {
+    const shareUrl = "https://www.fbti.fan";
+    QRCode.toDataURL(shareUrl, {
       width: 120,
       margin: 1,
       color: {

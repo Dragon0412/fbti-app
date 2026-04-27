@@ -1,77 +1,79 @@
 {
-  "totalCount": 33,
+  "totalCount": 44,
   "dailyCounts": {
     "2026-04-21": 12,
     "2026-04-25": 12,
-    "2026-04-26": 9
+    "2026-04-26": 9,
+    "2026-04-27": 11
   },
   "personalityTypes": {
     "EXWL": 3,
-    "ESPD": 1,
+    "ESPD": 2,
     "ASPL": 1,
-    "EXWD": 4,
+    "EXWD": 7,
     "ASWL": 1,
-    "EXPD": 5,
+    "EXPD": 8,
     "ESPL": 1,
-    "AXWD": 1,
-    "EXPL": 13,
+    "AXWD": 2,
+    "EXPL": 15,
     "AXPL": 2,
-    "AXWL": 1
+    "AXWL": 2
   },
   "typeGenes": {
     "horror": {
-      "sum": 87,
-      "count": 33
+      "sum": 109,
+      "count": 44
     },
     "comedy": {
-      "sum": 72,
-      "count": 33
+      "sum": 87,
+      "count": 44
     },
     "scifi": {
-      "sum": 38,
-      "count": 33
+      "sum": 55,
+      "count": 44
     },
     "romance": {
-      "sum": 79,
-      "count": 33
+      "sum": 92,
+      "count": 44
     },
     "action": {
-      "sum": 35,
-      "count": 33
+      "sum": 47,
+      "count": 44
     },
     "drama": {
-      "sum": 86,
-      "count": 33
+      "sum": 117.5,
+      "count": 44
     },
     "animation": {
-      "sum": 55.5,
-      "count": 33
+      "sum": 72.5,
+      "count": 44
     }
   },
   "hiddenAttributes": {
     "alpha": {
-      "common": 16,
-      "uncommon": 12,
-      "rare": 4,
-      "legendary": 1
+      "common": 20,
+      "uncommon": 14,
+      "rare": 7,
+      "legendary": 3
     },
     "beta": {
-      "common": 9,
-      "uncommon": 20,
-      "rare": 4,
+      "common": 11,
+      "uncommon": 25,
+      "rare": 8,
       "legendary": 0
     },
     "gamma": {
-      "common": 4,
-      "uncommon": 3,
-      "rare": 26,
-      "legendary": 0
+      "common": 5,
+      "uncommon": 5,
+      "rare": 32,
+      "legendary": 2
     }
   },
   "geneShapes": {
-    "均衡探索型": 15,
+    "均衡探索型": 23,
     "反差萌型": 9,
-    "类型专家型": 5,
-    "三足鼎立型": 4
+    "类型专家型": 7,
+    "三足鼎立型": 4,
+    "极致专精型": 1
   }
 }

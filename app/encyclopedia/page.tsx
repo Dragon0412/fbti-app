@@ -452,7 +452,6 @@ export default function EncyclopediaPage() {
                              hover:border-amber-500/50 hover:bg-[#222845] transition-all duration-300 text-left"
                 >
                   <div className="flex items-start gap-4">
-                    <span className="text-3xl mt-0.5">⚡</span>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-white font-semibold text-base">精简版</span>
@@ -473,7 +472,6 @@ export default function EncyclopediaPage() {
                              hover:border-amber-500/50 hover:bg-[#222845] transition-all duration-300 text-left"
                 >
                   <div className="flex items-start gap-4">
-                    <span className="text-3xl mt-0.5">🎬</span>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-white font-semibold text-base">完整版</span>

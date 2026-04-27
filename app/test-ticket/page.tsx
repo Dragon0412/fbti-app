@@ -21,7 +21,7 @@ export default function TicketTearTestPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0a0e1a] flex flex-col items-center justify-center px-4">
+    <main className="min-h-screen flex flex-col items-center justify-center px-4">
       {/* 返回链接 */}
       <Link
         href="/"

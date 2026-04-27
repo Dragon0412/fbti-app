@@ -63,7 +63,7 @@ export default function StatsPage() {
 
   if (loading) return <SkeletonPage />;
   if (error) return (
-    <main className="min-h-screen bg-[#0f1225] flex items-center justify-center px-4">
+    <main className="min-h-screen bg-[#0f1225]/80 flex items-center justify-center px-4">
       <div className="text-center">
         <p className="text-red-400 text-lg mb-4">加载失败: {error}</p>
         <button onClick={() => window.location.reload()} className="px-6 py-2 bg-[#1a1f35] text-gray-300 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors">
@@ -116,7 +116,7 @@ export default function StatsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0f1225] relative overflow-hidden">
+    <main className="min-h-screen bg-[#0f1225]/80 relative overflow-hidden">
       {/* Ambient glow */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-to-b from-amber-500/5 via-transparent to-transparent blur-3xl" />
@@ -352,7 +352,7 @@ export default function StatsPage() {
 
 function SkeletonPage() {
   return (
-    <main className="min-h-screen bg-[#0f1225] px-4 py-12">
+    <main className="min-h-screen bg-[#0f1225]/80 px-4 py-12">
       <div className="max-w-4xl mx-auto">
         {/* Title skeleton */}
         <div className="text-center mb-12">
@@ -418,9 +418,8 @@ function SkeletonPage() {
 
 function EmptyState() {
   return (
-    <main className="min-h-screen bg-[#0f1225] flex items-center justify-center px-4">
+    <main className="min-h-screen bg-[#0f1225]/80 flex items-center justify-center px-4">
       <div className="text-center">
-        <div className="text-6xl mb-6">🎬</div>
         <h2 className="text-2xl font-bold text-white mb-3">暂无数据</h2>
         <p className="text-gray-400 mb-8">成为第一个参与者！</p>
         <Link
